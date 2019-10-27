@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+    <link rel="icon" href="img/favicon.ico" type="image/x-icon"/>
+    <link rel="shortcut icon" href="img/favicon.jpg" type="image/x-icon"/>
+    <title>layui表格列自适应加强</title>
+    <link rel="stylesheet" href="js/plugin/layui/src/css/layui.css">
+    <style>
+        html, body {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+
+<div class="layui-body" id="main">
+    <span class="layui-btn" data-type="resize">调整main宽度</span>
+    <table id="table1" lay-filter="table1"></table>
+</div>
+
+<script src="js/plugin/layui/src/layui.js"></script>
+<script>
+    //JavaScript代码区域
+    layui.use('table', function () {
+        var table = layui.table;
+        var $ = layui.jquery;
+        var layer = layui.layer;
+        var active = {
+            'resize': function () {
+                var btnElem = $(this);
+                $('#main').css('left', btnElem.hasClass('layui-btn-warm') ? 200 : 20);
+                btnElem.toggleClass('layui-btn-warm');
+                $(window).resize();
+            }
+        };
+
+        $('.layui-btn').unbind('click').click(function () {
+            var type = $(this).data('type');
+            typeof active[type] === 'function' && active[type].call(this);
+        });
+
+
+        table.render({
+            elem: '#table1'
+            , url: 'C:/Users/haozai/Downloads/layui_test/json/table/user.json'
+            , page: true
+            , cellMinWidth: 80 //全局定义常规单元格的最小宽度，layui 2.2.1 新增
+            , cols: [[
+                {field: 'id', width: 80, title: 'ID', sort: true}
+                , {field: 'username', width: 80, title: '用户名', event: 'detail'}
+                , {field: 'sex', width: 80, title: '性别', sort: true}
+                , {field: 'city', width: 80, title: '城市'}
+                , {field: 'sign', title: '签名', width: '15%', minWidth: 100} //minWidth：局部定义当前单元格的最小宽度，layui 2.2.1 新增
+                , {field: 'experience', title: '积分', width: 80, sort: true}
+                , {field: 'score', title: '评分', sort: true}
+                , {field: 'classify', width: 80, title: '职业'}
+                , {
+                    width: 137,
+                    title: '工具',
+                    align: 'center',
+                    fixed: 'right',
+                    toolbar: '<div><span class="layui-btn layui-btn-xs layui-btn-primary" lay-event="addFriend">加好友</span></div>'
+                }
+            ]]
+        });
+        // $(window).resize();
+
+    });
+</script>
+
+<!-- 让IE8/9支持媒体查询，从而兼容栅格 -->
+<!--[if lt IE 9]>
+<script src="https://cdn.staticfile.org/html5shiv/r29/html5.min.js"></script>
+<script src="https://cdn.staticfile.org/respond.js/1.4.2/respond.min.js"></script>
+<![endif]-->
+</body>
+</html>

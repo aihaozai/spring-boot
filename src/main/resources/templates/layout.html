@@ -1,0 +1,87 @@
+<div class="layui-layout layui-layout-admin" >
+    <!-- 头部区域 -->
+    <div class="layui-header" id="app-header">
+        <script type="text/html"
+                template
+                lay-done="layui.element.render('nav','sys-header')">
+        <ul class="layui-nav layui-layout-left" lay-filter="sys-header">
+            <li class="layui-nav-item layadmin-flexible" lay-unselect="">
+                <a href="javascript:;" layadmin-event="flexible" title="侧边伸缩">
+                    <i class="layui-icon layui-icon-shrink-right" id="LAY_app_flexible"></i>
+                </a>
+            </li>
+        </ul>
+        </script>
+    </div>
+   <!--tab头部-->
+    <div class="layui-header-tab">
+        <script type="text/html"
+                template
+                lay-done="layui.element.render('tab','system-tab')">
+        <div class="layui-tab layui-layout-left" lay-filter="system-tab" id="lay-tab" lay-allowClose="true">
+            <ul class="layui-tab-title">
+                <li lay-url="/baiduMap" class="layui-this">百度地图</li>
+            </ul>
+        </div>
+        </script>
+    </div>
+
+    <!-- 侧边菜单 -->
+    <div class="layui-side layui-side-menu" id="app-sidebar">
+        <div class="layui-side-scroll">
+              <div class="layui-logo" ><!--
+                <img data-th-src="@{system/images/logo.ico}">-->
+                <span class="sys-title">layuiAdmin</span>
+              </div>
+            <script
+                type="text/html"
+                template
+                lay-api="/getMenus"
+                lay-done="layui.element.render('nav','layadmin-system-side-menu')">
+            <ul class="layui-nav layui-nav-tree" lay-shrink="all" id="LAY-system-side-menu" lay-filter="layadmin-system-side-menu">
+                {{# function buildMenu(data){
+                    var html='';
+                    layui.each(data,function(index,item){
+                        html += ' <li data-name="'+item.menuName+'" data-jump class="layui-nav-item">
+                        <a href="javascript:;"lay-href="'+item.menuUrl+'"lay-tips="'+item.menuName+'" lay-direction="2">
+                            <i class="layui-icon '+item.menuIcon+'"></i>
+                            <cite class="app-cite app-cite-show">'+item.menuName+'</cite>' ;
+                        var cHtml = buildChildrenMenu(item.childrens);
+                        if(cHtml=='')html+='</a>';
+                        else html+='<span class="layui-nav-more"></span></a>';
+                        html+= cHtml+'</li>';
+                    });
+                    return html;
+                    }
+                }}
+                {{# function buildChildrenMenu(data){
+                    var childrenHtml ='<dl class="layui-nav-child" >';
+                    var itemHtml ='';
+                    var num = '0';
+                layui.each(data,function(index,item){
+                    num +=index;
+                    itemHtml +='<dd data-name="'+item.menuName+'" data-jump="'+item.menuUrl+'">
+                        <a href="javascript:;" lay-href="'+item.menuUrl+'">
+                                '+item.menuName+'
+                           </a>';
+                            if(item.childrens.length>0) itemHtml+= buildChildrenMenu(item.childrens);
+                    });
+                    itemHtml+='</dd>';
+                    var result = childrenHtml+itemHtml+'</dl>';
+                    if(num==='0') return '';
+                    return result;
+                    }
+                }}
+                {{ buildMenu(d.data) }}
+            </ul>
+            </script>
+        </div>
+    </div>
+
+    <!-- 主体内容 -->
+    <div class="layui-body" id="main-body">
+
+    </div>
+</div>
+
+

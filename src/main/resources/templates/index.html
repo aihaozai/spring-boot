@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title>权限系统</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="renderer" content="webkit">
+    <meta name="referrer" content="no-referrer"/>  <!-- 访问图片出现403的解决办法-->
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" th:href="@{layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{layui/css/treetable.css}" media="all">
+    <link rel="stylesheet" th:href="@{system/css/admin.css}" media="all">
+    <link rel="stylesheet" th:href="@{system/css/shrink.css}" media="all">
+    <link rel="stylesheet" th:href="@{system/css/divcenter.css}" media="all">
+    <script th:src="@{system/modules/jquery-3.4.1.min.js}"></script>
+    <script th:src="@{system/modules/monitor.js}"></script>
+    <script th:src="@{system/modules/timeUtil.js}"></script>
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=9nFuVmZkignxQOh4L00wmBEm8edD53rl"></script>
+    <style>
+        .layui-form-select dl  {
+            position: absolute;
+            /*z-index:999;*/
+        }
+    </style>
+</head>
+<div id="main" class="layadmin-tabspage-none"></div>
+<script th:src="@{layui/layui.js}"></script>
+<script th:inline="javascript">
+    console.log([[${roles}]]);
+    var currentUser ={};
+     currentUser.roles = [[${roles}]];
+        layui.config({
+            base: './system/',
+            debug: true
+        }).use(['index']);
+</script>
+</html>

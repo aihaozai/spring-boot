@@ -1,0 +1,352 @@
+<div class="layadmin-tabsbody-item layui-show">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15" style="width: 40%;float: left">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-layout">
+                        <div class="layui-table-box" id="roleTableBox" style="overflow:auto;height:89%;">
+                            <table id="roleTable" class="layui-table" style="display: none" lay-filter="roleTable"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space15" style="width: 20%;float: left;margin-left: 15px">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-layout">
+                        <!--                        <div class="div-head">-->
+                        <!--                            <div class="div-inline div-center" style="left: 4%"><p class="div-inline">角色管理</p></div>-->
+                        <!--                            <div class="div-inline div-center" style="left: 97%">-->
+                        <!--                                <button id="addJob" type="button" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">添加</button>-->
+                        <!--                            </div>-->
+                        <!--                        </div>-->
+                        <div class="layui-table-box" style="overflow:auto;height:89%;">
+                            <table id="roleMenuTable" class="layui-table" style="display: none" lay-filter="roleMenuTable"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="layui-row layui-col-space15" style="width: 40%;float: left;margin-left: 15px">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-layout">
+                        <div class="layui-table-box" style="overflow:auto;height:89%;">
+                            <table id="roleUserTable" class="layui-table" style="display: none" lay-filter="roleUserTable"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-inline="none" type="text/javascript">
+    layui.config({
+        base: './layui/'
+    }).use(['table','layer','form','element','treetable'], function(){
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        var element = layui.element;
+        var treetable = layui.treetable;
+        var flag = true;    //刷新表格flag
+        var oldData,oldCurr,oldLimit,oldPage;   //记录table数据,当前页数，每页多少,
+        var roleObj;
+        layer.load(2);
+
+        var renderTable = function (elem,url,data) {
+            table.render({
+                elem: elem
+                , url: url
+                , cols: [[
+                    {type:'radio'},
+                    {field: 'roleName', title: '角色名称',edit: 'dblEdit'}
+                ]]
+                , page: true
+                , limit: 10   //默认十条数据一页
+                , limits: [10, 20, 30, 50]  //数据分页条
+                , where :data
+                , done: function (res, curr, count) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                    if(res.data.length>0){
+                        renderRadio(res.data);  //默认选中第一个
+                        getRoleMenuData(res.data[0]["id"]);
+                        getRoleUserData(res.data[0]["id"]);
+                    }
+                    $("#roleTableBox").find('thead tr th .laytable-cell-radio').html('<button type="button" id="addRole" class="layui-btn layui-btn-primary layui-btn-xs" ><i class="layui-icon"></i></button>');
+                    addRole();
+                }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+        };
+
+        var renderUserTable = function (data,idArray) {
+            layer.load(2);
+            table.render({
+                elem: '#roleUserTable'
+                , url: '/user/getUserPage'
+                , cols: [[
+                    {type:'checkbox'},
+                    {field: 'username', title: '用户名称'}
+                ]]
+                , page: true
+                , limit: 10   //默认十条数据一页
+                , limits: [10, 20, 30, 50]  //数据分页条
+                , where :data
+                , done: function (res, curr, count) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                    layui.each(res.data,function (index,item) {
+                        if(idArray[index]===item['roleId']){
+                            res.data[index]['LAY_CHECKED']=true;
+                        }
+                    });
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+        };
+
+        //菜单树
+        function renderMenuTable(data,idArray) {
+            layer.load(2);
+            treetable.render({
+                treeColIndex: 1,//树形图标显示在第几列
+                treeSpid: 0,//最上级的父级id
+                treeIdName: 'menuId',//id字段的名称
+                treePidName: 'pid',//pid字段的名称
+                treeDefaultClose: false,//是否默认折叠
+                treeLinkage: true,//父级展开时是否自动展开所有子级
+                even:false,  //开启间隔行变色
+                elem: '#roleMenuTable',
+                url: '/menu/getMenuPage',
+                page: false,
+                // limit: 2,   //默认十条数据一页
+                // limits: [10, 20, 30, 50],  //数据分页条
+                where :data,
+                cols: [[
+                    {type:'checkbox'},
+                    {field: 'menuName', title: '菜单名称'}
+                ]],
+                done: function (res, curr, count) {
+                    layer.closeAll('loading');
+                    if(flag){
+                        oldData = res.allData;     //记录数据
+                        oldCurr = curr;
+                        oldLimit = res.limit;
+                        oldPage = res.page;
+                        if(idArray.length>0)renderCheckbox(idArray,res.data);//首次加载渲染 避免动态选择checkbox  reloadTable多次执行该方法
+                    }
+                    flag=true;
+                }
+            });
+        }
+        // 渲染角色表格
+        renderTable('#roleTable','/role/getRolePage');
+
+        //动态渲染单选框
+        function renderRadio(data) {
+            data[0]["LAY_CHECKED"]=true;  //数据添加选中
+            //下面是通过更改css来实现选中的效果
+            var index= data[0]['LAY_TABLE_INDEX'];
+            var dom = $('tr[data-index=' + index + '] input[type="radio"]');
+            dom.prop('checked', true);
+            dom.next().addClass('layui-form-checked layui-form-radioed');
+            dom.next().find('i').addClass('layui-anim-scaleSpring');
+            form.render('radio');   //渲染
+            roleObj=data[0];
+            console.log(roleObj)
+        }
+        //动态渲染复选框
+        function renderCheckbox(idArray,data) {
+            layui.each(idArray,function (idIndex,idItem) {
+                layui.each(data,function (index,item) {
+                    if(idItem===item["menuId"]){
+                        data[index]["LAY_CHECKED"]=true;  //数据添加选中
+                        //下面是通过更改css来实现选中的效果
+                        index= data[index]['LAY_TABLE_INDEX'];
+                        var dom = $('tr[data-index=' + index + '] input[type="checkbox"]');
+                        dom.prop('checked', true);
+                        dom.next().addClass('layui-form-checked');
+                    }
+                });
+            });
+            form.render('checkbox');   //渲染
+        }
+
+        //获得角色拥有的菜单
+        function getRoleMenuData(data) {
+            $.post('/role/getRoleMenu',{'tField':'menuId','field':'roleId','object':data},function (res) {
+                renderMenuTable({'asc':'sort'},res.data);
+            });
+        }
+        //获得角色下的用户
+        function getRoleUserData(data) {
+            $.post('/role/getRoleUser',{'tField':'userRole','field':'personRole','object':data},function (res) {
+                renderUserTable({'asc':'sort'},res.data);
+            });
+        }
+
+        //监听角色单选框
+        table.on('radio(roleTable)',function (obj) {
+            flag=true;  //选中角色
+            getRoleMenuData(obj.data.id);
+            getRoleUserData(obj.data.id);
+            roleObj=data; //记录角色
+        });
+        //监听菜单checkbox
+        table.on('checkbox(roleMenuTable)',function (obj) {
+            renderParentMenu($(this),obj.data.pid,obj.data.menuId,obj.checked);
+        });
+        table.on('checkbox(roleUserTable)',function (obj) {
+            var checkStatus = table.checkStatus('roleUserTable') //id
+                , data = checkStatus.data;
+            var arrayChecked='',num=0;
+            layui.each(data,function (index,item) {
+                if(num>0){
+                    num++;
+                    arrayChecked+=","+item["roleId"];
+                }else {
+                    num++;
+                    arrayChecked+=item["roleId"];
+                }
+            });
+            $.post('/role/authorizeUser',{"userRoleArray":arrayChecked,"personRole":roleObj.id},function (res) {
+                layer.msg(res.message)
+            });
+        });
+
+        //菜单树渲染选中
+        function renderParentMenu(dom,pid,menuId,checked) {
+            flag = false;
+            if(pid==='0'&&checked){     //选择父节点
+                dom.closest('tbody').find('tr td .treeTable-icon').each(function (index, item) {
+                    if (menuId === $(this).attr('lay-cel-pid')||menuId===$(this).attr('lay-tid')) {
+                        var tr = $(this).closest('tr');
+                        index = tr.attr('data-index');
+                        if(oldPage)index = Number(Number(oldLimit*(parseInt(oldCurr)-1)+parseInt(index)));
+                        oldData[index]["LAY_CHECKED"] = true;   //数据真正的选中
+                        if(oldPage)selectChildren(index,true);    //如果开启分页 所有页的子节点选中
+                    }
+                });
+            }else if(pid==='0'&&!checked){  //取消选择父节点
+                dom.closest('tbody').find('tr td .treeTable-icon').each(function (index, item) {
+                    if (menuId === $(this).attr('lay-cel-pid')||menuId===$(this).attr('lay-tid')) {
+                        var tr = $(this).closest('tr');
+                        index = tr.attr('data-index');
+                        if(oldPage)index = Number(Number(oldLimit*(parseInt(oldCurr)-1)+parseInt(index)));
+                        oldData[index]["LAY_CHECKED"] = false;   //数据真正的选中
+                        if(oldPage)selectChildren(index,false);    //如果开启分页 所有页的子节点取消选中
+                    }
+                });
+            }else if(checked&&pid!==undefined&&menuId!==undefined) {     //子节点选中
+                dom.closest('tbody').find('tr td .treeTable-icon').each(function (index, item) {
+                    if (pid === $(this).attr('lay-tid')||menuId===$(this).attr('lay-tid')) {
+                        var tr = $(this).closest('tr');
+                        index = tr.attr('data-index');
+                        if(oldPage)index = Number(Number(oldLimit*(parseInt(oldCurr)-1)+parseInt(index)));
+                        oldData[index]["LAY_CHECKED"] = true;   //数据真正的选中
+                        if(oldPage)selectParent(index,true);    //如果开启分页 在所有页中找到父节点选中
+                    }
+                });
+            }else if(!checked&&pid!==undefined&&menuId!==undefined) {     //子节点取消选中
+                var index = dom.closest('tr').attr('data-index');
+                index = Number(Number(oldLimit*(parseInt(oldCurr)-1)+parseInt(index)));
+                oldData[index]["LAY_CHECKED"] = false;   //数据真正的选中
+
+            }else if(checked&&pid===undefined&&menuId===undefined){     //全选
+                dom.closest('thead').find('tr th .layui-unselect').addClass('layui-form-checked');
+                dom.closest('.layui-table-box').find('tbody tr').each(function (index, item) {
+                    index = $(this).attr('data-index');
+                    if(oldPage)index = Number(Number(oldLimit*(parseInt(oldCurr)-1)+parseInt(index)));
+                    oldData[index]["LAY_CHECKED"] = true;   //数据真正的选中
+                    if(oldPage)selectParent(index,true);   //在所有页中找到父节点选中
+                    if(oldData[index]["pid"]==='0'&&oldPage)selectChildren(index,true);    //如果全选选中了父节点，则所有页的子节点选中
+                });
+            }else if(!checked&&pid===undefined&&menuId===undefined){    //取消全选
+                dom.closest('thead').find('tr th .layui-unselect').removeClass('layui-form-checked');
+                dom.closest('.layui-table-box').find('tbody tr').each(function (index, item) {
+                    index = $(this).attr('data-index');
+                    if(oldPage)index = Number(Number(oldLimit*(parseInt(oldCurr)-1)+parseInt(index)));
+                    oldData[index]["LAY_CHECKED"] = false;   //数据真正的取消选中
+                    if(oldPage)selectParent(index,false);  //在所有页中找到父节点取消选中
+                    if(oldData[index]["pid"]==='0'&&oldPage)selectChildren(index,false);    //如果全选取消了父节点，则所有页的子节点取消选中
+
+                });
+            }
+            //重新加载table数据    //以上数据不需要css样式选中 因为reload
+            table.reload('roleMenuTable', {
+                data: oldData
+            });
+            function selectParent(index,checked) {
+                layui.each(oldData,function (num,item) {
+                    if(oldData[index]["pid"]===item["menuId"]){
+                        if(oldData[num]["LAY_CHECKED"]!==checked)
+                            oldData[num]["LAY_CHECKED"] = checked;
+                    }
+                })
+            }
+            function selectChildren(index,checked) {
+                layui.each(oldData,function (num,item) {
+                    if(oldData[index]["menuId"]===item["pid"]){
+                        if(oldData[num]["LAY_CHECKED"]!==checked)
+                            oldData[num]["LAY_CHECKED"] = checked;
+                    }
+                })
+            }
+            var arrayChecked=getArray(oldData);
+            $.post('/role/authorizeMenu',{"id":roleObj.id,"roleName":roleObj.roleName,"array":arrayChecked},function (res) {
+                layer.msg(res.message)
+            });
+        }
+        //得到字符串
+        function getArray(data) {
+            var arrayChecked='',num=0;
+            layui.each(data,function (index,item) {
+                if(item["LAY_CHECKED"]===true){
+                    if(num>0){
+                        num++;
+                        arrayChecked+=","+item["id"];
+                    }else {
+                        num++;
+                        arrayChecked+=item["id"];
+                    }
+                }
+            });
+            return arrayChecked;
+        }
+        //添加角色
+        function addRole() {
+            $("#addRole").click(function(event){
+                var array = table.cache["roleTable"];
+                var data={"id":"","roleName":""};
+                array.push(data);
+                table.reload('roleTable',{
+                    data : array
+                });
+            });
+        }
+        //监听单元格编辑
+        table.on('edit(roleTable)', function(obj){
+            var value = obj.value //得到修改后的值
+                ,data = obj.data //得到所在行所有键值
+                ,field = obj.field; //得到字段
+            $.post('/role/addOrUpdateRole',data,function (res) {
+                layer.msg(res.message);
+            });
+        });
+    });
+</script>

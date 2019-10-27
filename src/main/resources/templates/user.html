@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body >
+<img src="/static/img/2.jpg"/>
+<table border="1">
+    <tr>
+        <td>phone</td>
+    </tr>
+    <tr th:each="user:${user}">
+        <td th:text="${user.phone}"></td>
+    </tr>
+</table>
+</body>
+</html>

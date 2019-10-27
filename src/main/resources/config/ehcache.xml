@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ehcache>
+  <diskStore path="java.io.tmpdir/cache" />
+  <defaultCache
+          eternal="false"
+          maxElementsInMemory="10000"
+          overflowToDisk="false"
+          diskPersistent="false"
+          timeToIdleSeconds="120"
+          timeToLiveSeconds="120"
+           />
+  <!-- users 缓存空间 -->
+  <cache
+          name="users"
+          eternal="false"
+          maxElementsInMemory="10000"
+          overflowToDisk="true"
+          diskPersistent="true"
+          timeToIdleSeconds="120"
+          timeToLiveSeconds="120"
+         />
+</ehcache>

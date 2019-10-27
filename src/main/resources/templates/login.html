@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link rel="stylesheet" th:href="@{layui/css/layui.css(t=2)}" media="all">
+
+</head>
+<style>
+    html,body{
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0;
+    }
+    .layui-login-form{
+        margin: 0 auto ; width: 400px;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+</style>
+<body>
+    <div class="layui-login-form">
+        <form class="layui-form">
+        <div class="">
+            <input type="text" name="username" lay-verify="required"
+                   placeholder="用户名" autocomplete="off" class="layui-input">
+        </div>
+        <div class="">
+            <input type="password" name="password" lay-verify="required"
+                   placeholder="密码" autocomplete="off" class="layui-input">
+        </div>
+        <div class="">
+            <button class="layui-btn layui-btn-normal layui-btn-fluid" lay-submit
+                    lay-filter="login-submit" id="login">
+                立即登录
+            </button>
+        </div>
+        </form>
+    </div>
+</body>
+<script th:src="@{layui/layui.js}"></script>
+<script th:inline="javascript">
+    layui.use(['form', 'layer'], function (form,layer) {
+        var $ = layui.jquery;
+        //提交登录表单
+        form.on('submit(login-submit)', function (data) {
+            var loading = $(this).find('.layui-icon');
+            if (loading.is(":visible")) return;
+            loading.show();
+            $.ajax({
+                type: "POST",
+                url: "/checkLogin",
+                contentType:"application/json;charset=UTF-8",
+                data: JSON.stringify(data.field),
+                dataType:"json",
+                success: function (data) {
+                    layer.msg(data.code);
+                    window.location.href = "/index";
+                }
+            });
+            return false;
+        });
+    });
+</script>
+</html>

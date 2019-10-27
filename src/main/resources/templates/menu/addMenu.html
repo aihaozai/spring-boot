@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <script th:src="@{/layui/layui.js}"></script>
+</head>
+<style>
+    .btn-color{
+        border: 1px solid #FF5722;
+    }
+    .layui-form-select dl { max-height:150px; }
+</style>
+<body>
+<div>
+    <div style="padding: 10px; background-color: #F2F2F2;">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md6">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <form class="layui-form" action="">
+                            <input type="hidden" id="pid" name="pid"  class="layui-input">
+                            <input type="hidden" id="menuType" name="menuType"  class="layui-input">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">父菜单名称</label>
+                                <div id="pm" class="layui-input-block">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">菜单名称</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="menuName" name="menuName" lay-verify="required" lay-reqtext="菜单名称不能为空" placeholder="请输入" autocomplete="off" class="layui-input" maxlength="30">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">菜单路径</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="menuUrl" name="menuUrl"  placeholder="请输入" class="layui-input" maxlength="45">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">菜单类型</label>
+                                <div class="layui-input-block ">
+                                    <select id="mType" lay-filter="mType" disabled="disabled">
+                                        <option value="1">目录</option>
+                                        <option value="2">菜单</option>
+                                        <option value="3">按钮</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">菜单图标</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="menuIcon" name="menuIcon"  placeholder="请输入" autocomplete="off" class="layui-input" maxlength="30">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" style="display: none">
+                                <div class="layui-input-block">
+                                    <!-- 隐藏提交按钮，在父层中调用 -->
+                                    <button class="layui-btn" lay-filter="addMenuForm" lay-submit >添加</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script data-th-inline="none" type="text/javascript">
+    layui.use(['form'],function () {
+        var $ = layui.jquery,
+        form = layui.form;
+        $.getJSON('/menu/getPMenu', function (res) {
+            if (res.code === "success") {
+                var sel = '<select lay-filter="pMenu" id="pMenu" lay-search>';
+                layui.each(res.data, function (index, item) {
+                    sel += '<option  value="' + item.value + '">' + item.name + '</option>';
+                });
+                sel += '</select>';
+                $("#pm").append(sel);
+                $("#pMenu").val($("#pid").val());   //设置默认选择框值
+                checkType($("#menuType").val());      //设置默认菜单类型
+                form.render('select');
+            } else {
+                layui.msg(res.code)
+            }
+        });
+        //监听父菜单选择事件
+        form.on('select(pMenu)', function(data){
+            $("#pid").val(data.value);
+            if(data.value==='0')   //选择为根目录
+                checkType('1');
+            else $.get("/menu/getOneMenuType", { "id": data.value },
+                function(data){
+                    data = Number(data.data)+Number(1)+'';
+                    checkType(data);
+                });
+        });
+        //监听菜单类型选择事件
+        form.on('select(mType)', function(data){
+            $("#menuType").val(data.value);
+        });
+        //提交表单
+        form.on('submit(addMenuForm)', function(data){
+            var index = layer.load(1);
+            $.ajax({
+                type: "POST",
+                url: "/menu/saveMenu",
+                contentType:"application/json;charset=UTF-8",
+                data: JSON.stringify(data.field),
+                dataType:"json",
+                success: function (data) {
+                    if(data.code==="success"){
+                        //数据提交后关闭弹出层
+                        layer.close(index);     //关闭加载动画
+                        //获得index (window.name  或者 layer.open弹出层Id)
+                        index = parent.layer.getFrameIndex(window.name);
+                        parent.layer.close(index);
+                    }
+                }
+            });
+            return false;
+        });
+
+        function checkType(type) {
+            var typeDom = $("#mType");
+            switch (type) {
+                case '1':
+                    var value = '';
+                    typeDom.find('option').each(function (index,ele){
+                        value+=ele.value;
+                    });
+                    //如果没有根目录则在首位添加进去
+                    if(value.indexOf("1")===-1) $("#mType").prepend('<option value="1">目录</option>');
+                    typeDom.val(1).attr("disabled","disabled");   //赋值 //根目录菜单类型禁用
+                    $("#menuType").val(1);
+                    $("#menuIcon").val('').removeAttr("readonly").removeAttr("placeholder").attr("placeholder","请输入");
+                    form.render('select');
+                    break;
+                case '2':   //父菜单为目录类型
+                    typeDom.removeAttr("disabled"); //去掉禁用
+                    typeDom.find('option').each(function (index,ele){
+                        if(ele.value==='1') $("#mType").find('option')[index].remove();     //存在菜单类型为目录则去掉
+                    });
+                    set();
+                    break;
+                case '3':   //父菜单为菜单类型
+                    typeDom.attr("disabled","disabled");
+                    set();
+                    break;
+            }
+        }
+        //默认为按钮类型
+        function set() {
+            $("#mType").val(3);
+            $("#menuType").val(3);
+            form.render('select');
+            $("#menuIcon").val("").attr("readonly","readonly").attr("placeholder","目录类型才能设置图标");
+        }
+    });
+</script>
+</html>

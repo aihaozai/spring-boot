@@ -1,0 +1,247 @@
+<div class="layadmin-tabsbody-item layui-show">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-layout">
+                        <div class="div-head">
+                            <div class="div-inline div-center" style="left: 4%"><p class="div-inline">定时任务管理</p></div>
+                            <div class="div-inline div-center" style="left: 97%">
+                                <button id="addJob" type="button" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">添加</button>
+                            </div>
+                        </div>
+                        <div class="layui-table-box" style="overflow:auto;height:89%;">
+                            <table id="jobTable" class="layui-table" style="display: none" lay-filter="jobTable"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-inline="none" type="text/javascript">
+    layui.config({
+        base: './layui/'
+    }).use(['table','layer','form','element'], function(){
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        var element = layui.element;
+        layer.load(2);
+        var timeArray = [],timeId = [];
+        // 渲染表格
+        var renderTable = function () {
+            table.render({
+                elem: '#jobTable'
+                , url: '/job/getJobPage'
+                , cols: [[
+                    {field: 'jobName', width: 170, title: '任务名称'}
+                    ,{field: 'jobGroup', width: 120, title: '任务分组'}
+                    , {field: 'cronExpression',width: 120, title: '执行时间',edit: 'dblEdit'}
+                    , {field: 'startTime',templet: start,width: 160, title: '开始时间',align:'center'}
+                    , {field: 'endTime',templet: end, width: 160, title: '结束时间',align:'center'}
+                    , {templet: progressBar,width: 120, title: '进度'}
+                    , {templet: status, title: '操作'}
+                ]]
+                , page: true
+                , limit: 10   //默认十条数据一页
+                , limits: [10, 20, 30, 50]  //数据分页条
+                , done: function (res, curr, count) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                    form.render('checkbox');
+                    element.render('progress');
+                }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+        };
+        renderTable();
+        $('#addJob').click(function () {
+            addOrEditJob('add','')
+        });
+
+        //添加
+        function addOrEditJob(id,param) {
+            var flag = false;
+            layer.open({
+                type: 2,
+                title: param===null?"添加定时任务":"编辑定时任务", //标题栏
+                closeBtn: 2,    //右上角关闭按钮样式,0不显示
+                area: ["555px", "575px"],
+                shade: 0.2, //阴影
+                id: id, //设定一个id，防止重复弹出
+                btn: ['提交', '取消'],
+                btnAlign: 'r',
+                moveType: 1, //拖拽模式，0或者1
+                content: '/job/addOrEditJob?id='+param,
+                success: function (layero, index) {    //成功获得加载html时，预先加载，将值从父窗口传到 子窗口
+                    var body = layer.getChildFrame('body', index);  //弹出窗口body
+                    //赋值数据
+                },
+                yes: function (index, layero) { //提交按钮
+                    let body = layer.getChildFrame('body', index);
+                    var submit = body.find('button')[0];
+                    // 触发点击事件，会对表单进行验证，验证成功则提交表单，失败则返回错误信息
+                    submit.click();
+                    flag = true;
+                },
+                btn2: function (index, layero) {
+                },
+                end: function () {
+                    if (flag){
+                        renderTable();//提交成功关闭后刷新table
+                    }
+                }
+            });
+        }
+
+        function start(d){
+            if(d.startTime==null){
+                return '--';
+            }
+            return d.startTime
+        }
+        function end(d){
+            if(d.endTime==null){
+                return '--';
+            }
+            return d.endTime
+        }
+        function status(d){//操作中显示的内容
+            var tool ='';
+            var id =d.quartzId+','+d.jobName+','+d.jobGroup;
+            if(d.jobStatus==='Y'){
+               tool = '<input type="checkbox" id ="'+id+'" lay-filter="switchJob" checked="" name="open" lay-skin="switch" lay-text="开启|关闭">';
+            }else {
+                tool = '<input type="checkbox" id ="'+id+'" lay-filter="switchJob" name="close" lay-skin="switch" lay-text="开启|关闭">'
+            }
+            if(timeUtil.compareCurrentTime(d.endTime)) {
+                tool += '<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
+                    '<button type="button" style="font-size:13px" lay-event="edit" class="layui-btn layui-btn-xs layui-btn-normal layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>编辑<span>&nbsp;&nbsp;&nbsp;</span></button>' +
+                    '<button type="button" style="font-size:13px" lay-event="del" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>删除<span>&nbsp;&nbsp;&nbsp;</span></button>';
+                    }
+            else{
+            tool = '<button type="button" style="font-size:13px;" lay-event="del" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>删除<span>&nbsp;&nbsp;&nbsp;</span></button>';
+            }
+            return tool;
+        }
+        function progressBar(d){
+            var percent = "0%";
+            if(d.startTime!=null&&d.endTime!=null) {
+                timeArray.push(d.startTime + "," + d.endTime);
+                timeId.push(d.quartzId);
+                var startTime = timeUtil.DateToUnix(d.startTime);
+                var endTime = timeUtil.DateToUnix(d.endTime);
+                var currentTime = timeUtil.DateToUnix(timeUtil.getCurrentTime());
+                percent = percentNum(Math.abs(Number(currentTime) - Number(startTime)), Number(endTime) - Number(startTime));
+                var result = percent.replace("%", "");
+                if (result > 100) {
+                    percent = "100%"
+                }
+            }
+            return '<div style="margin-top: 6%" class="layui-progress layui-progress-big" lay-showPercent="true" lay-filter="'+d.quartzId+'">' +
+                '  <div class="layui-progress-bar layui-bg-blue" lay-percent="'+percent+'"></div>' +
+                '</div>'
+        }
+        function percentNum(num, num2) {
+            return (Math.round(num / num2 * 10000) / 100.00 + "%"); //小数点后两位百分比
+        }
+        //监听工具条
+        table.on('tool(jobTable)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if(layEvent==='del'){
+                layer.msg('正在删除<br><span style="color: orangered">[</span>'+data.beanName+'<span style="color: orangered">]</span>', {
+                    time:false,
+                    btn: ['删除', '取消'],
+                    yes: function () {
+                        $.ajax({
+                            type:'POST',
+                            url:'/job/deleteJob',
+                            contentType:'application/json;charset=UTF-8',
+                            data:JSON.stringify(data),
+                            dataType:'json',
+                            success:function (data) {
+                                layer.msg(data.message);
+                                if(data.code==='success') renderTable();
+                            }
+                        });
+                    }
+                });
+            }
+            if(layEvent==='edit'){
+                addOrEditJob('editJob',data.quartzId)
+            }
+        });
+        //监听开关
+        form.on('switch(switchJob)', function (data) {
+            //data.elem  得到checkbox原始DOM对象
+            //data.elem.checked 开关是否开启，true或者false
+            //data.value 开关value值，也可以通过data.elem.value得到
+            //data.othis 得到美化后的DOM对象
+            var array = $(this).attr('id').split(",");
+            var param = {};
+            param.quartzId=array[0];
+            param.jobName=array[1];
+            param.jobGroup=array[2];
+            param.jobStatus=data.elem.checked===true ? 'Y':'N';
+            $.ajax({
+                type:'POST',
+                url:'/job/updateJobStatus',
+                contentType:'application/json;charset=UTF-8',
+                data:JSON.stringify(param),
+                dataType:'json',
+                success:function (data) {
+                    layer.msg(data.message);
+                    if(data.code==='fail') {
+                        renderTable();  //刷新 相当于恢复原数据
+                    }
+                }
+            });
+
+        });
+
+        //监听单元格编辑
+        table.on('edit(jobTable)', function(obj){
+            var value = obj.value //得到修改后的值
+                ,data = obj.data //得到所在行所有键值
+                ,field = obj.field; //得到字段
+            $.ajax({
+                type:'POST',
+                url:'/job/updateJob',
+                contentType:'application/json;charset=UTF-8',
+                data:JSON.stringify(data),
+                dataType:'json',
+                success:function (data) {
+                    layer.msg(data.message);
+                    if(data.code==='fail') {
+                        renderTable();  //刷新 相当于恢复原数据
+                    }
+                }
+            });
+        });
+        //加载进度
+        setInterval(function () {
+            if(timeArray.length>0){
+                var currentTime = timeUtil.DateToUnix(timeUtil.getCurrentTime());
+                layui.each(timeArray,function (index,item) {
+                    var array = item.split(",");
+                    var startTime = timeUtil.DateToUnix(array[0]);
+                    var endTime = timeUtil.DateToUnix(array[1]);
+                    var percent = percentNum(Math.abs(Number(currentTime)-Number(startTime)),Number(endTime)-Number(startTime));
+                    var result = percent.replace("%","");
+                    if(result>100){
+                        percent="100%"
+                    }
+                    element.progress(timeId[index], percent);
+                })
+            }
+        }, 10000);
+    });
+</script>
