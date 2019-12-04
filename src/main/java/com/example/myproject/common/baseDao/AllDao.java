@@ -54,4 +54,8 @@ public class AllDao{
     public class PersonRoleDao extends BaseDao<PersonRole,String>{
 
     }
+    @Repository
+    public class ActReModelDao extends BaseDao<ActReModel,String>{
+
+    }
 }

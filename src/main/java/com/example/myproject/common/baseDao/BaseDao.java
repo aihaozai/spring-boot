@@ -3,7 +3,9 @@ package com.example.myproject.common.baseDao;
 import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.entity.Page;
 import org.apache.commons.lang3.StringUtils;
+import org.hibernate.SQLQuery;
 import org.hibernate.query.internal.NativeQueryImpl;
+import org.hibernate.query.spi.NativeQueryImplementor;
 import org.hibernate.transform.Transformers;
 import org.springframework.cglib.beans.BeanMap;
 import javax.persistence.*;
@@ -46,12 +48,10 @@ public class BaseDao<T,ID extends Serializable> {
     public EntityManager getEntityManager() {
         return entityManager;
     }
-
     public void save(T entity){
         this.entityManager.persist(entity);
         this.entityManager.flush();
     }
-
     public void  update(ID id){
         T entity = findByID(id);
         this.entityManager.merge(entity);
@@ -72,9 +72,9 @@ public class BaseDao<T,ID extends Serializable> {
         return pojo;
     }
 
-    public void deleteByFiled(String field,Object object){
-        T entity = findSingleBeanByFiled(field,object);
-        this.entityManager.remove(entity);
+    public Integer deleteByFiled(String field,Object object){
+        String hsql = MessageFormat.format("delete {0} where {1} = ''{2}'' ", entityClass.getSimpleName(),field,object);
+        return this.entityManager.createQuery(hsql).executeUpdate();
     }
     public Integer deleteByFiled(String tField,Object tObject,String nField,Object object){
         String hsql = MessageFormat.format("delete {0} where {1} = ''{2}'' and {3} = ''{4}'' ", entityClass.getSimpleName(),tField,tObject,nField,object);
@@ -110,7 +110,7 @@ public class BaseDao<T,ID extends Serializable> {
     }
 
     public List<T> findAll() {
-        return this.entityManager.createQuery("from "+entityClass.getSimpleName()).getResultList();
+        return this.entityManager.createQuery("FROM "+entityClass.getSimpleName()).getResultList();
     }
     /**
      *@author Jen
@@ -127,7 +127,7 @@ public class BaseDao<T,ID extends Serializable> {
     }
     /**
      *@author Jen
-     *@Point 根据一个字段查询
+     *@Point 根据一个字段查询HSQL
      *@Param file 字段名 object查询参数
      *@return Bean
      */
@@ -139,13 +139,24 @@ public class BaseDao<T,ID extends Serializable> {
     }
     /**
      *@author Jen
-     *@Point 根据一个字段查询
+     *@Point 根据一个字段查询HSQL
      *@Param file 字段名 object查询参数
      *@return List
      */
     public List<T> findListByFiled(String filed, Object o){
         String sql = MessageFormat.format("FROM {0} where {1} = ''{2}''", entityClass.getSimpleName(), filed, o);
         List<T> list = createHSQLList(sql);
+        entityManager.close();
+        return list;
+    }
+
+    /**
+     *@author Jen
+     *@Point SQL查询
+     *@return List
+     */
+    public List findListBySQL(String sql){
+        List list = createSQLList(sql);
         entityManager.close();
         return list;
     }
@@ -282,6 +293,20 @@ public class BaseDao<T,ID extends Serializable> {
      *@Exception NoResultException
      *@return HashMap
      */
+    public List getListMapBySQLQuery(String sql) {
+        try {
+            return createSQLMap(sql).getResultList();
+        }catch (NoResultException e){
+            return null;
+        }
+    }
+
+    /**
+     *@Point 查询结果为Map
+     *@Param SQl
+     *@Exception NoResultException
+     *@return HashMap
+     */
     public HashMap getMapBySQLQuery(String sql) {
         try {
             return (HashMap)createSQLMap(sql).getSingleResult();
@@ -298,6 +323,12 @@ public class BaseDao<T,ID extends Serializable> {
     private Query createSQLMap(String SQL) {
         Query query = this.getEntityManager().createNativeQuery(SQL);
         query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
+        return query;
+    }
+
+    private Query createSQLQueryMap(String SQL) {
+        Query query = this.getEntityManager().createNativeQuery(SQL);
+        query.unwrap(SQLQuery.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
         return query;
     }
 

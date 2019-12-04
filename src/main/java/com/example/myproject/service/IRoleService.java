@@ -2,7 +2,10 @@ package com.example.myproject.service;
 
 import com.example.myproject.entity.Page;
 import com.example.myproject.entity.Person;
+import com.example.myproject.entity.User;
+import com.example.myproject.entity.view.PersonMenuView;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -23,4 +26,8 @@ public interface IRoleService {
     String authorizeMenu(String id, String roleName, String array);
 
     String authorizeUser(String personRole, String userRole);
+
+    void delRole(String id);
+
+    List<PersonMenuView> findListByFiledIn(String roleId, List<Object> collectionToList, HashMap hashMap);
 }

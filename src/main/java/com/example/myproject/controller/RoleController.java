@@ -6,6 +6,7 @@ import com.example.myproject.entity.SystemResponse;
 import com.example.myproject.service.IRoleService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
 
@@ -35,6 +36,7 @@ public class RoleController {
             Map map =  roleServiceImpl.findListByPage(page);
             return new SystemResponse().pageData(map.get("count"),map.get("data"));
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().pageDataFail();
         }
     }
@@ -45,6 +47,7 @@ public class RoleController {
             List list = roleServiceImpl.getRoleMenu(tField,field,object);
             return new SystemResponse().success().data(list);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(e.getMessage());
         }
     }
@@ -55,6 +58,7 @@ public class RoleController {
             List list = roleServiceImpl.getRoleUser(tField,field,object);
             return new SystemResponse().success().data(list);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(e.getMessage());
         }
     }
@@ -64,6 +68,7 @@ public class RoleController {
         try {
             return new SystemResponse().success().message(roleServiceImpl.addOrUpdateRole(person));
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(e.getMessage());
         }
     }
@@ -73,6 +78,7 @@ public class RoleController {
         try {
             return new SystemResponse().success().message(roleServiceImpl.authorizeMenu(id,roleName,array));
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(e.getMessage());
         }
     }
@@ -82,7 +88,19 @@ public class RoleController {
         try {
             return new SystemResponse().success().message(roleServiceImpl.authorizeUser(personRole,userRoleArray));
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(e.getMessage());
+        }
+    }
+    @ResponseBody
+    @PostMapping("/delRole")
+    public SystemResponse delRole(String id){
+        try {
+            roleServiceImpl.delRole(id);
+            return new SystemResponse().success().message("删除成功");
+        }catch (Exception e){
+            e.printStackTrace();
+            return new SystemResponse().fail().message("删除失败");
         }
     }
 }

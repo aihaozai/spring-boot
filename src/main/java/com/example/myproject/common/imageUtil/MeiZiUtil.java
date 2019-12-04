@@ -16,11 +16,11 @@ import static com.example.myproject.common.imageUtil.DocumentUtil.getDocument;
  * @Create: 2019-10-27 18:09
  **/
 public class MeiZiUtil {
-    public static String path = "F:/meizitu/"; //存放文件地址
+    public static String path = "F:/reptile/pure/"; //存放文件地址
 
-    public static long restTime = 3000; //休眠时间 （豪秒）不能太快
+    public static long restTime = 100; //休眠时间 （豪秒）不能太快
 
-    public static void getClassification(String url)throws IOException {
+    public static void getClassification(String url,String fileName)throws IOException {
 
         Document doc = getDocument(url);
         // 获取总页数html
@@ -28,19 +28,16 @@ public class MeiZiUtil {
         //当前大分类总页数
         int PageCount = Integer.parseInt(PageCountHtml.get(PageCountHtml.size()-2).text());
         System.out.println("分类页数"+PageCount+"页");
-        File file = new File("F:/meizi.txt");
-        if (!file.exists()) {
-            file.createNewFile();
-        }
-        BufferedWriter bw = new BufferedWriter(new FileWriter(file));
-        for (int i = 1; i <PageCount; i++) {
-            getEachPage(url+"/page/"+i,bw);
+        BufferedWriter bw = new BufferedWriter(new FileWriter(FileUtil.getFile(fileName)));
+        for (int i = 1; i <=PageCount; i++) {
+            System.out.println("正在抓取第"+i+"页");
+            getEachPage(url+"/"+i+"/",bw);
         }
         bw.flush();
         System.out.println("图集地址抓取完毕");
     }
 
-    private static void getEachPage(String url,BufferedWriter bw)throws IOException{
+    private static void getEachPage(String url,BufferedWriter bw){
 
         Document doc = getDocument(url);
         if(doc!=null) {

@@ -3,10 +3,8 @@ package com.example.myproject.service.impl;
 import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.common.baseDao.AllDao;
 import com.example.myproject.common.utils.UUIDUtil;
-import com.example.myproject.entity.Page;
-import com.example.myproject.entity.Person;
-import com.example.myproject.entity.PersonRole;
-import com.example.myproject.entity.UserRole;
+import com.example.myproject.entity.*;
+import com.example.myproject.entity.view.PersonMenuView;
 import com.example.myproject.service.IRoleService;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,7 +20,6 @@ import java.util.*;
  **/
 @Service
 public class RoleServiceImpl implements IRoleService {
-
     @Autowired
     private AllDao.RoleDao roleDao;
     @Autowired
@@ -57,7 +54,6 @@ public class RoleServiceImpl implements IRoleService {
             return "添加成功";
         }
     }
-
     @Override
     @Transactional
     public String authorizeMenu(String id, String roleName, String array) {
@@ -114,4 +110,18 @@ public class RoleServiceImpl implements IRoleService {
         }
         return "用户授权成功";
     }
+
+    @Override
+    @Transactional
+    public void delRole(String id) {
+        roleDao.deleteByFiled("id",id);
+        personRoleDao.deleteByFiled("roleId",id);
+        userRoleDao.deleteByFiled("personRole",id);
+    }
+
+    @Override
+    public List<PersonMenuView> findListByFiledIn(String roleId, List<Object> collectionToList, HashMap hashMap) {
+        return personMenuViewDao.findListByFiledIn(roleId,collectionToList,hashMap);
+    }
+
 }

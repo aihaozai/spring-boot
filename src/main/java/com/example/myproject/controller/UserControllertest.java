@@ -1,21 +1,38 @@
 package com.example.myproject.controller;
 
 
+import com.example.myproject.common.utils.UUIDUtil;
 import com.example.myproject.entity.User;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+import lombok.extern.slf4j.Slf4j;
+import org.activiti.editor.constants.ModelDataJsonConstants;
+import org.activiti.engine.RepositoryService;
+import org.activiti.engine.RuntimeService;
+import org.activiti.engine.TaskService;
+import org.springframework.amqp.rabbit.connection.CorrelationData;
+import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.*;
+import org.activiti.engine.repository.Model;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
+
+import java.io.UnsupportedEncodingException;
 import java.util.*;
 
+@Slf4j
 @Controller
-@RequestMapping("/u")
+@RequestMapping("/")
 public class UserControllertest {
 //    @Autowired
 //    private UserService userService;
+    @Autowired
+    private RabbitTemplate rabbitTemplate;
     @Autowired
     private StringRedisTemplate stringRedisTemplate;
     @Autowired
@@ -46,15 +63,45 @@ public class UserControllertest {
     @GetMapping("/hi")
     @ResponseBody
     public void hi(Model model){
-        Map<String,Object> map = model.asMap();
-        Set<String> keyset = map.keySet();
-        Iterator<String> iterator = keyset.iterator();
-        while (iterator.hasNext()){
-            String key = iterator.next();
-            Object value = map.get(key);
-            System.out.println(key+">>>>>"+value);
-        }
+//        Map<String,Object> map = model.asMap();
+//        Set<String> keyset = map.keySet();
+//        Iterator<String> iterator = keyset.iterator();
+//        while (iterator.hasNext()){
+//            String key = iterator.next();
+//            Object value = map.get(key);
+//            System.out.println(key+">>>>>"+value);
+//        }
     }
+
+    @GetMapping("/t1")
+    @ResponseBody
+    public void resend() {
+        log.info("开始执行定时任务(投递消息)");
+        rabbitTemplate.convertAndSend("topicExchange","topic.man","111",new CorrelationData(UUIDUtil.currentTime()));// 重新投递
+        log.info("定时任务执行结束(投递消息)");
+    }
+    @GetMapping("/t2")
+    @ResponseBody
+    public void resend1() {
+        log.info("开始执行定时任务(投递消息)");
+        rabbitTemplate.convertAndSend("topicExchange","topic.woman","222");// 重新投递
+        log.info("定时任务执行结束(投递消息)");
+    }
+    @GetMapping("/t3")
+    @ResponseBody
+    public void resend3() {
+        log.info("开始执行定时任务(投递消息)");
+        rabbitTemplate.convertAndSend("topicExchange","topic.kk","333",new CorrelationData(UUIDUtil.currentTime()));// 重新投递
+        log.info("定时任务执行结束(投递消息)");
+    }
+
+
+//    @GetMapping("/look")
+//    @ResponseBody
+//    public void look (){
+//        System.out.println( "调用流程存储服务，查询部署数量：" + repositoryService.createDeploymentQuery().count());
+//
+//    }
 //    @GetMapping("/g")
 //    public String getUserById(Integer id){
 //        return  userService.getUserById(id);

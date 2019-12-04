@@ -1,10 +1,8 @@
 package com.example.myproject.common.config;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.amqp.core.BindingBuilder;
-import org.springframework.amqp.core.Binding;
-import org.springframework.amqp.core.DirectExchange;
-import org.springframework.amqp.core.Queue;
+import org.springframework.amqp.core.AcknowledgeMode;
+import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFactory;
 import org.springframework.amqp.rabbit.connection.CachingConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
@@ -49,24 +47,13 @@ public class RabbitMQConfig {
         return rabbitTemplate;
     }
 
-    // 发送邮件
-    public static final String MAIL_QUEUE_NAME = "mail.queue";
-    public static final String MAIL_EXCHANGE_NAME = "mail.exchange";
-    public static final String MAIL_ROUTING_KEY_NAME = "mail.routing.key";
-
     @Bean
-    public Queue mailQueue() {
-        return new Queue(MAIL_QUEUE_NAME, true);
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(){
+        SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
+        factory.setConnectionFactory(connectionFactory);
+        factory.setMessageConverter(converter());
+        factory.setAcknowledgeMode(AcknowledgeMode.MANUAL);
+        factory.setPrefetchCount(5);
+        return factory;
     }
-
-    @Bean
-    public DirectExchange mailExchange() {
-        return new DirectExchange(MAIL_EXCHANGE_NAME, true, false);
-    }
-
-    @Bean
-    public Binding mailBinding() {
-        return BindingBuilder.bind(mailQueue()).to(mailExchange()).with(MAIL_ROUTING_KEY_NAME);
-    }
-
 }

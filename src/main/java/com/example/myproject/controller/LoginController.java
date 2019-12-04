@@ -11,8 +11,8 @@ import com.example.myproject.entity.MenuTree;
 import com.example.myproject.entity.SystemResponse;
 import com.example.myproject.entity.User;
 import com.example.myproject.entity.view.PersonMenuView;
-import com.example.myproject.service.IUserService;
 import com.example.myproject.common.shiro.ShiroHelper;
+import com.example.myproject.service.IRoleService;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
 import org.apache.shiro.authz.annotation.RequiresPermissions;
@@ -35,15 +35,9 @@ import java.util.List;
 public class LoginController extends BaseController {
 
     @Autowired
-    private AllDao.UserDao userDao;
-    @Autowired
-    private AllDao.UserRoleViewDao userRoleViewDao;
-    @Autowired
-    private AllDao.PersonMenuViewDao personMenuViewDao;
+    private IRoleService roleServiceImpl;
     @Autowired
     private ShiroHelper shiroHelper;
-    @Autowired
-    private IUserService userServiceImpl;
 
     @RequestMapping("/login")
     public String Login(){
@@ -61,9 +55,9 @@ public class LoginController extends BaseController {
             super.login(token);     //主体提交登录请求到SecurityManager
             return new SystemResponse().success();
         } catch (UnknownAccountException | IncorrectCredentialsException | LockedAccountException e) {
-            response.put("msg",e.getMessage());
+            response.put("message",e.getMessage());
         } catch (AuthenticationException e) {
-            response.put("msg","认证失败！");
+            response.put("message","认证失败！");
         }
         return response;
     }
@@ -76,13 +70,18 @@ public class LoginController extends BaseController {
     @ResponseBody
     @PostMapping("/getMenus")
     public SystemResponse getMenu(){
-        JSONObject resultObject = new JSONObject();
-        AuthorizationInfo authorizationInfo = shiroHelper.getCurrentUserAuthorizationInfo();
-        HashMap hashMap = new HashMap();
-        hashMap.put("asc","sort");
-        List<PersonMenuView> personMenuViews =personMenuViewDao.findListByFiledIn("roleId", TransformUtil.CollectionToList(authorizationInfo.getRoles()),hashMap);
-        List<MenuTree> menuTreeList = MenuTreeUtil.buildMenuTree(MenuTreeUtil.distinctMenuTree(personMenuViews));
-        return new SystemResponse().success().data(menuTreeList);
+        try {
+            JSONObject resultObject = new JSONObject();
+            AuthorizationInfo authorizationInfo = shiroHelper.getCurrentUserAuthorizationInfo();
+            HashMap hashMap = new HashMap();
+            hashMap.put("asc","sort");
+            List<PersonMenuView> personMenuViews =roleServiceImpl.findListByFiledIn("roleId", TransformUtil.CollectionToList(authorizationInfo.getRoles()),hashMap);
+            List<MenuTree> menuTreeList = MenuTreeUtil.buildMenuTree(MenuTreeUtil.distinctMenuTree(personMenuViews));
+            return new SystemResponse().success().data(menuTreeList);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new SystemResponse().fail().data(new ArrayList<>());
+        }
     }
 
     @GetMapping("/baiduMap")
@@ -92,9 +91,15 @@ public class LoginController extends BaseController {
 
     @RequestMapping("/index")
     public String index(Model model){
-        AuthorizationInfo authorizationInfo = shiroHelper.getCurrentUserAuthorizationInfo();
-        model.addAttribute("roles",authorizationInfo.getRoles());
-        return "index";
+        try {
+            AuthorizationInfo authorizationInfo = shiroHelper.getCurrentUserAuthorizationInfo();
+            model.addAttribute("roles",authorizationInfo.getRoles());
+            return "index";
+        }catch (Exception e){
+            e.printStackTrace();
+            return "login";
+        }
+
     }
 
     @ResponseBody

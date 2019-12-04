@@ -1,0 +1,59 @@
+<div class="layadmin-tabsbody-item layui-show">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-layout">
+                        <div class="layui-upload">
+                            <button type="button" class="layui-btn" id="uploadFile">上传图片</button>
+                            <div class="layui-upload-list">
+                                <img class="layui-upload-img" style="width: 35%" id="uploadFileImg">
+                                <p id="uploadFileText"></p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-inline="none" type="text/javascript">
+    layui.config({
+        base: './layui/'
+    }).use(['upload'], function() {
+        var $ = layui.jquery
+            ,upload = layui.upload;
+        var uploadInst = upload.render({
+            elem: '#uploadFile'
+            ,url: '/upload/uploadFile'
+            ,before: function(obj){
+                //预读本地文件示例，不支持ie8
+                obj.preview(function(index, file, result){
+                    $('#uploadFileImg').attr('src', result); //图片链接（base64）
+                });
+            }
+            ,done: function(res){
+                //如果上传失败
+                if(res.code==='success'){
+                    var uploadFileText = $('#uploadFileText');
+                    uploadFileText.html('<span style="color: green;">上传成功</span> <a class="layui-btn layui-btn-xs demo-reload">重新上传</a>');
+                    uploadFileText.find('.demo-reload').on('click', function(){
+                        uploadInst.upload();
+                    });
+                    return layer.msg('上传成功');
+                }else {
+                    return layer.msg('上传失败');
+                }
+                //上传成功
+            }
+            ,error: function(index, upload){
+                //演示失败状态，并实现重传
+                var uploadFileText = $('#uploadFileText');
+                uploadFileText.html('<span style="color: #FF5722;">上传失败</span> <a class="layui-btn layui-btn-xs demo-reload">重试</a>');
+                uploadFileText.find('.demo-reload').on('click', function(){
+                    uploadInst.upload();
+                });
+            }
+        });
+    });
+</script>

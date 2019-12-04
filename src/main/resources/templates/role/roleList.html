@@ -61,7 +61,8 @@
                 , url: url
                 , cols: [[
                     {type:'radio'},
-                    {field: 'roleName', title: '角色名称',edit: 'dblEdit'}
+                    {field: 'roleName', title: '角色名称',edit: 'dblEdit',width:'75%'},
+                    { title: '操作',templet: complain,width:'15%'}
                 ]]
                 , page: true
                 , limit: 10   //默认十条数据一页
@@ -75,7 +76,7 @@
                         getRoleMenuData(res.data[0]["id"]);
                         getRoleUserData(res.data[0]["id"]);
                     }
-                    $("#roleTableBox").find('thead tr th .laytable-cell-radio').html('<button type="button" id="addRole" class="layui-btn layui-btn-primary layui-btn-xs" ><i class="layui-icon"></i></button>');
+                    $("#roleTableBox").find('thead tr th .laytable-cell-radio').html('<i id="addRole" class="layui-icon layui-icon-add-circle"></i>');
                     addRole();
                 }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
                     return {
@@ -106,9 +107,11 @@
                     layer.msg(res.msg);
                 }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
                     layui.each(res.data,function (index,item) {
-                        if(idArray[index]===item['roleId']){
-                            res.data[index]['LAY_CHECKED']=true;
-                        }
+                        layui.each(idArray,function (num,target) {
+                            if(target===item['roleId']){
+                                res.data[index]['LAY_CHECKED']=true;
+                            }
+                        });
                     });
                     return {
                         "code": res.code, //解析接口状态
@@ -133,8 +136,8 @@
                 even:false,  //开启间隔行变色
                 elem: '#roleMenuTable',
                 url: '/menu/getMenuPage',
-                page: false,
-                // limit: 2,   //默认十条数据一页
+                 page: false,
+                 limit: 999,   //由于默认十条数据一页,而我这里改造成树形表单不想开启分页,设置999
                 // limits: [10, 20, 30, 50],  //数据分页条
                 where :data,
                 cols: [[
@@ -205,7 +208,7 @@
             flag=true;  //选中角色
             getRoleMenuData(obj.data.id);
             getRoleUserData(obj.data.id);
-            roleObj=data; //记录角色
+            roleObj=obj.data; //记录角色
         });
         //监听菜单checkbox
         table.on('checkbox(roleMenuTable)',function (obj) {
@@ -346,7 +349,29 @@
                 ,field = obj.field; //得到字段
             $.post('/role/addOrUpdateRole',data,function (res) {
                 layer.msg(res.message);
+                if(res.code==='success')renderTable('#roleTable','/role/getRolePage');
             });
+        });
+        function complain(d){//操作中显示的内容
+            return '<a class="operation" lay-event="del" href="javascript:void(0)" title="删除">'+
+                '<i class="layui-icon layui-icon-delete" ></i></a>';
+        }
+        //监听工具条
+        table.on('tool(roleTable)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if(layEvent==='del'){
+                layer.msg('正在删除<br><span style="color: orangered">[</span>'+data.roleName+'<span style="color: orangered">]</span>', {
+                    time:false,
+                    btn: ['删除', '取消'],
+                    yes: function () {
+                        $.post("/role/delRole",{"id":data.id},function(res){
+                            layer.msg(res.message);
+                            if(res.code==='success')renderTable('#roleTable','/role/getRolePage');
+                        })
+                    }
+                });
+            }
         });
     });
 </script>

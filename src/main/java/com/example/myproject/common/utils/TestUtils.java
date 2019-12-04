@@ -26,7 +26,7 @@ public class TestUtils {
 
     //utils工具类中使用service和mapper接口的方法例子，用"testUtils.xxx.方法" 就可以了
 //    public static void test(){
-//        testUtils.iMenuService.findAllMenu();
+//        testUtils.iMenuService.findListByPage();
 //    }
 
 }

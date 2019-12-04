@@ -1,4 +1,4 @@
-package com.example.myproject.common.RabbitMQConsumer;
+package com.example.myproject.common.rabbitMQ;
 
 import com.example.myproject.common.config.RabbitMQConfig;
 import com.example.myproject.common.utils.MailUtil;

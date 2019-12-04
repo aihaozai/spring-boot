@@ -20,7 +20,7 @@ public class ImageUrlJob implements Job {
         JobDataMap data=context.getTrigger().getJobDataMap();
         String invokeParam =(String) data.get("invokeParam");
         try {
-            MeiZiTuUtil.getClassification("https://www.mzitu.com/xinggan");
+            MeiZiTuUtil.getClassification("https://www.mzitu.com/xinggan","newMeizi");
         } catch (IOException e) {
             e.printStackTrace();
         }

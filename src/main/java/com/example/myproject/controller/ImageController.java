@@ -28,7 +28,8 @@ public class ImageController {
     @ResponseBody
     @RequestMapping("/getImageUrl")
     public SystemResponse getImageUrl(String type){
-        String[] array = new String[]{"F:/fengjing.txt","F:/meizi.txt"};
+        String head = "F:/reptile/";
+        String[] array = new String[]{head+"fengjing.txt",head+"meizi.txt",head+"pure.txt"};
         String pathName = array[Integer.parseInt(type)];
         List<String> list = new ArrayList();
         try {
@@ -41,6 +42,7 @@ public class ImageController {
             }
             return new SystemResponse().success().message("读取图片Url成功").data(list);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(e.getMessage());
         }
     }

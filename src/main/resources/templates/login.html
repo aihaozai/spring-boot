@@ -56,8 +56,12 @@
                 data: JSON.stringify(data.field),
                 dataType:"json",
                 success: function (data) {
-                    layer.msg(data.code);
-                    window.location.href = "/index";
+                    if(data.code==='success'){
+                        layer.msg("登录成功");
+                        window.location.href = "/index";
+                    }else {
+                        layer.msg(data.message)
+                    }
                 }
             });
             return false;

@@ -44,6 +44,7 @@ public class JobController {
             try {
                 modelAndView.addObject("scheduleJob",scheduleJobServiceImpl.findById(id));
             }catch (Exception e){
+                e.printStackTrace();
                 modelAndView.addObject("scheduleJob",new ScheduleJob());
             }
         }
@@ -56,6 +57,7 @@ public class JobController {
             Map map =  scheduleJobServiceImpl.findListByPage(page);
             return new SystemResponse().pageData(map.get("count"),map.get("data"));
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().pageDataFail();
         }
     }
@@ -81,6 +83,7 @@ public class JobController {
             }
             return new SystemResponse().code(result).message(result);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(result);
         }
     }
@@ -91,6 +94,7 @@ public class JobController {
         try {
             return scheduleJobServiceImpl.updateJobStatus(scheduleJob);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().error();
         }
     }
@@ -101,6 +105,7 @@ public class JobController {
         try {
             return scheduleJobServiceImpl.deleteJob(scheduleJob);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(e.getMessage());
         }
     }
@@ -111,6 +116,7 @@ public class JobController {
         try {
             return scheduleJobServiceImpl.updateJob(scheduleJob);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message(e.getMessage());
         }
     }

@@ -1,8 +1,5 @@
 package com.example.myproject.common.Scheduled;
 
-import com.example.myproject.common.utils.SpringContextUtil;
-import com.example.myproject.common.utils.TransformUtil;
-import com.example.myproject.job.JobOne;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.quartz.*;

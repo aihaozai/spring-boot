@@ -1,0 +1,62 @@
+<div class="layadmin-tabsbody-item layui-show">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-layout">
+                        <div class="div-head">
+                            <div class="div-inline div-center" style="left: 4%"><p class="div-inline">定时任务管理</p></div>
+                            <div class="div-inline div-center" style="left: 97%">
+                                <button id="addJob" type="button" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">添加</button>
+                            </div>
+                        </div>
+                        <div class="layui-table-box" style="overflow:auto;height:89%;">
+                            <table id="modelTable" class="layui-table" style="display: none" lay-filter="modelTable"></table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-inline="none" type="text/javascript">
+    layui.config({
+        base: './layui/'
+    }).use(['table','layer','form','element'], function(){
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        var element = layui.element;
+        layer.load(2);
+        // 渲染表格
+        var renderTable = function () {
+            table.render({
+                elem: '#modelTable'
+                , url: '/model/getModelsPage'
+                , cols: [[
+                    {field: 'name', title: '模型名称'}
+                    ,{field: 'version',  title: '版本'}
+                    , {field: 'createTime', title: '创建时间'}
+
+                ]]
+                , page: true
+                , limit: 10   //默认十条数据一页
+                , limits: [10, 20, 30, 50]  //数据分页条
+                , done: function (res, curr, count) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                    form.render('checkbox');
+                    element.render('progress');
+                }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+        };
+        renderTable();
+    });
+</script>

@@ -40,7 +40,7 @@
                     , {field: 'cronExpression',width: 120, title: '执行时间',edit: 'dblEdit'}
                     , {field: 'startTime',templet: start,width: 160, title: '开始时间',align:'center'}
                     , {field: 'endTime',templet: end, width: 160, title: '结束时间',align:'center'}
-                    , {templet: progressBar,width: 120, title: '进度'}
+                    , {templet: jobSwitch,width: 100, title: '开关'}
                     , {templet: status, title: '操作'}
                 ]]
                 , page: true
@@ -114,43 +114,22 @@
             return d.endTime
         }
         function status(d){//操作中显示的内容
-            var tool ='';
-            var id =d.quartzId+','+d.jobName+','+d.jobGroup;
-            if(d.jobStatus==='Y'){
-               tool = '<input type="checkbox" id ="'+id+'" lay-filter="switchJob" checked="" name="open" lay-skin="switch" lay-text="开启|关闭">';
-            }else {
-                tool = '<input type="checkbox" id ="'+id+'" lay-filter="switchJob" name="close" lay-skin="switch" lay-text="开启|关闭">'
-            }
             if(timeUtil.compareCurrentTime(d.endTime)) {
-                tool += '<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
+                return  '<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
                     '<button type="button" style="font-size:13px" lay-event="edit" class="layui-btn layui-btn-xs layui-btn-normal layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>编辑<span>&nbsp;&nbsp;&nbsp;</span></button>' +
                     '<button type="button" style="font-size:13px" lay-event="del" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>删除<span>&nbsp;&nbsp;&nbsp;</span></button>';
                     }
             else{
-            tool = '<button type="button" style="font-size:13px;" lay-event="del" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>删除<span>&nbsp;&nbsp;&nbsp;</span></button>';
+                return '<button type="button" style="font-size:13px;" lay-event="del" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>删除<span>&nbsp;&nbsp;&nbsp;</span></button>';
             }
-            return tool;
         }
-        function progressBar(d){
-            var percent = "0%";
-            if(d.startTime!=null&&d.endTime!=null) {
-                timeArray.push(d.startTime + "," + d.endTime);
-                timeId.push(d.quartzId);
-                var startTime = timeUtil.DateToUnix(d.startTime);
-                var endTime = timeUtil.DateToUnix(d.endTime);
-                var currentTime = timeUtil.DateToUnix(timeUtil.getCurrentTime());
-                percent = percentNum(Math.abs(Number(currentTime) - Number(startTime)), Number(endTime) - Number(startTime));
-                var result = percent.replace("%", "");
-                if (result > 100) {
-                    percent = "100%"
-                }
+        function jobSwitch(d){
+            var id =d.quartzId+','+d.jobName+','+d.jobGroup;
+            if(d.jobStatus==='Y'){
+                return '<input type="checkbox" id ="'+id+'" lay-filter="switchJob" checked="" name="open" lay-skin="switch" lay-text="开启|关闭">';
+            }else {
+                return '<input type="checkbox" id ="'+id+'" lay-filter="switchJob" name="close" lay-skin="switch" lay-text="开启|关闭">'
             }
-            return '<div style="margin-top: 6%" class="layui-progress layui-progress-big" lay-showPercent="true" lay-filter="'+d.quartzId+'">' +
-                '  <div class="layui-progress-bar layui-bg-blue" lay-percent="'+percent+'"></div>' +
-                '</div>'
-        }
-        function percentNum(num, num2) {
-            return (Math.round(num / num2 * 10000) / 100.00 + "%"); //小数点后两位百分比
         }
         //监听工具条
         table.on('tool(jobTable)', function (obj) {
@@ -226,22 +205,5 @@
                 }
             });
         });
-        //加载进度
-        setInterval(function () {
-            if(timeArray.length>0){
-                var currentTime = timeUtil.DateToUnix(timeUtil.getCurrentTime());
-                layui.each(timeArray,function (index,item) {
-                    var array = item.split(",");
-                    var startTime = timeUtil.DateToUnix(array[0]);
-                    var endTime = timeUtil.DateToUnix(array[1]);
-                    var percent = percentNum(Math.abs(Number(currentTime)-Number(startTime)),Number(endTime)-Number(startTime));
-                    var result = percent.replace("%","");
-                    if(result>100){
-                        percent="100%"
-                    }
-                    element.progress(timeId[index], percent);
-                })
-            }
-        }, 10000);
     });
 </script>

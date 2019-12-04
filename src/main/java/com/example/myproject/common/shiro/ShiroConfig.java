@@ -8,7 +8,6 @@ import org.apache.shiro.spring.web.ShiroFilterFactoryBean;
 import org.apache.shiro.web.mgt.DefaultWebSecurityManager;
 import org.springframework.aop.framework.autoproxy.DefaultAdvisorAutoProxyCreator;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,13 +24,14 @@ import java.util.Map;
 public class ShiroConfig {
     @Autowired
     private SystemProperties systemProperties;
+
     /**
      *@author Jen
      *@Point 配置Shiro核心 安全管理器 SecurityManager
      *@return SecurityManager
      */
     @Bean
-    public SecurityManager securityManager(ShiroRealm shiroRealm) {
+    public DefaultWebSecurityManager securityManager(ShiroRealm shiroRealm) {
         DefaultWebSecurityManager securityManager = new DefaultWebSecurityManager();
         // 配置 SecurityManager，并注入 shiroRealm
         securityManager.setRealm(shiroRealm);

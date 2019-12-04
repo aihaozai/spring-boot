@@ -37,6 +37,7 @@ public class MenuController {
             Map map =  menuServiceImpl.findAllMenuByPage(page);
             return new SystemResponse().pageData(map.get("count"),map.get("data"));
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().pageDataFail();
         }
     }
@@ -55,6 +56,7 @@ public class MenuController {
             }
             return new SystemResponse().success().data(jsonArray);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail();
         }
     }
@@ -76,6 +78,7 @@ public class MenuController {
             }
             return new SystemResponse().success().data(jsonArray);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail();
         }
     }
@@ -91,6 +94,7 @@ public class MenuController {
             Menu menu = menuServiceImpl.getOneMenuType("menuId",id);
             return new SystemResponse().success().data(menu.getMenuType());
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail();
         }
     }
@@ -102,6 +106,7 @@ public class MenuController {
             menuServiceImpl.saveMenu(menu);
             return new SystemResponse().success().data(menu.getMenuType());
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail();
         }
     }
@@ -113,6 +118,7 @@ public class MenuController {
             menuServiceImpl.delMenu(id);
             return new SystemResponse().success().message("删除成功");
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message("删除失败");
         }
     }
@@ -126,6 +132,7 @@ public class MenuController {
                 return new SystemResponse().success().message("修改成功");
             }else  return new SystemResponse().fail().message("修改失败");
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message("修改失败");
         }
     }
@@ -139,6 +146,7 @@ public class MenuController {
                 return new SystemResponse().success().message("修改成功");
             }else  return new SystemResponse().fail().message("修改失败");
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail().message("修改失败");
         }
     }
@@ -169,6 +177,7 @@ public class MenuController {
             );
             return systemResponse.success().data(jsonArray);
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().fail();
         }
     }
@@ -179,6 +188,7 @@ public class MenuController {
             Map map =  menuServiceImpl.findListByPage(page);
             return new SystemResponse().pageData(map.get("count"),map.get("data"));
         }catch (Exception e){
+            e.printStackTrace();
             return new SystemResponse().pageDataFail();
         }
     }
