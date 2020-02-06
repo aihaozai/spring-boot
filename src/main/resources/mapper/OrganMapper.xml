@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.myproject.mapper.OrganMapper">
+  <resultMap id="ResultMap" type="hashmap" />
+  <sql id="Base_Column_List">
+    a.id, a.pid, a.organ_id as organId, a.organ_name as organName, a.organ_level as organLevel, a.sort, DATE_FORMAT(a.create_time,'%Y-%m-%d %H:%i:%s') as createTime,
+    DATE_FORMAT(a.update_time,'%Y-%m-%d %H:%i:%s') as updateTime
+  </sql>
+     <select id="findAll" resultMap="ResultMap"  parameterType="object">
+        select
+        <include refid="Base_Column_List" />,
+        ( select dict_name  from dict where dict_code = a.organ_level) as levelName
+         from organ a where 1=1
+     </select>
+
+</mapper>

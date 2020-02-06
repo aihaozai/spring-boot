@@ -29,7 +29,10 @@
                             <input type="hidden" id="menuType" name="menuType"  class="layui-input">
                             <div class="layui-form-item">
                                 <label class="layui-form-label">父菜单名称</label>
-                                <div id="pm" class="layui-input-block">
+                                <div class="layui-input-block">
+                                    <select lay-filter="pMenu" id="pMenu" lay-search >
+                                        <option th:each="data:${menuArray}" th:value="${data.value}" th:text="${data.name}" ></option>
+                                    </select>
                                 </div>
                             </div>
                             <div class="layui-form-item">
@@ -41,7 +44,7 @@
                             <div class="layui-form-item">
                                 <label class="layui-form-label">菜单路径</label>
                                 <div class="layui-input-block">
-                                    <input type="text" id="menuUrl" name="menuUrl"  placeholder="请输入" class="layui-input" maxlength="45">
+                                    <input type="text" id="menuUrl" name="menuUrl"  placeholder="请输入" class="layui-input" maxlength="45" >
                                 </div>
                             </div>
                             <div class="layui-form-item">
@@ -78,27 +81,17 @@
     layui.use(['form'],function () {
         var $ = layui.jquery,
         form = layui.form;
-        $.getJSON('/menu/getPMenu', function (res) {
-            if (res.code === "success") {
-                var sel = '<select lay-filter="pMenu" id="pMenu" lay-search>';
-                layui.each(res.data, function (index, item) {
-                    sel += '<option  value="' + item.value + '">' + item.name + '</option>';
-                });
-                sel += '</select>';
-                $("#pm").append(sel);
-                $("#pMenu").val($("#pid").val());   //设置默认选择框值
-                checkType($("#menuType").val());      //设置默认菜单类型
-                form.render('select');
-            } else {
-                layui.msg(res.code)
-            }
-        });
+        $("#pMenu").val($("#pid").val());   //设置默认选择框值
+        var type =$("#menuType").val();
+        if(type==='0')type='1';
+        checkType(type);      //设置默认菜单类型
+        form.render('select');
         //监听父菜单选择事件
         form.on('select(pMenu)', function(data){
             $("#pid").val(data.value);
             if(data.value==='0')   //选择为根目录
                 checkType('1');
-            else $.get("/menu/getOneMenuType", { "id": data.value },
+            else $.get("/menu/getMenuTypeByField", { "menuId": data.value },
                 function(data){
                     data = Number(data.data)+Number(1)+'';
                     checkType(data);

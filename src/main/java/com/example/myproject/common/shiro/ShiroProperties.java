@@ -15,4 +15,7 @@ public class ShiroProperties {
     private String successUrl;
     private String anonUrl;
     private String logoutUrl;
+    private long sessionTimeout;
+    private int cookieTimeout;
+
 }

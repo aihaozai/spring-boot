@@ -1,20 +1,16 @@
 package com.example.myproject.service.impl;
 
 import com.example.myproject.common.baseDao.AllDao;
-import com.example.myproject.common.utils.UUIDUtil;
-import com.example.myproject.entity.MenuPermission;
-import com.example.myproject.entity.Page;
 import com.example.myproject.entity.User;
 import com.example.myproject.entity.UserRole;
+import com.example.myproject.entity.view.MenuPermissionRoleView;
+import com.example.myproject.entity.view.UserLoginView;
 import com.example.myproject.service.IShiroService;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.transaction.Transactional;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * @Program: myproject
@@ -24,15 +20,14 @@ import java.util.Map;
 @Service
 public class ShiroServiceImpl implements IShiroService {
     @Autowired
-    private AllDao.UserDao userDao;
-    @Autowired
     private AllDao.UserRoleDao userRoleDao;
     @Autowired
-    private AllDao.MenuPermissionDao menuPermissionDao;
-
+    private AllDao.UserLoginViewDao userLoginViewDao;
+    @Autowired
+    private AllDao.MenuPermissionRoleViewDao menuPermissionRoleViewDao;
     @Override
-    public User findByFiled(String filed, Object object) {
-        return userDao.findSingleBeanByFiled(filed, object);
+    public UserLoginView findByFiled(String filed, Object object) {
+        return userLoginViewDao.findSingleBeanByFiled(filed, object);
     }
 
     @Override
@@ -41,8 +36,8 @@ public class ShiroServiceImpl implements IShiroService {
     }
 
     @Override
-    public List<MenuPermission> findListByFiledIn(String filed, List<Object> list) {
-        return menuPermissionDao.findListByFiledIn(filed, list,new HashMap());
+    public List<MenuPermissionRoleView> findListByFiledIn(String filed, List<String> list) {
+        return menuPermissionRoleViewDao.findListByFiledIn(filed, list,new HashMap());
     }
 
 }

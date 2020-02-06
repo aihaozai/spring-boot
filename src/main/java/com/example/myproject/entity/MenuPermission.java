@@ -31,8 +31,8 @@ public class MenuPermission implements Serializable {
     @Column(name = "menu_name")
     private String menuName;
 
-    @Column(name = "role_id")
-    private String roleId;
+    @Column(name = "permission_name")
+    private String permissionName;
 
     private String permission;
 

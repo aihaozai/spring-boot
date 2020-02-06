@@ -48,6 +48,9 @@ public class SystemResponse extends JSONObject {
         this.code("0");
         this.message("success");
         this.count(count);
+        //@JSONField(format = "yyyy-MM-dd HH:mm:ss")
+        // 实体类中使用@JSONField转时间要把结果转JSON 所以使用@JsonFormat最好,不用转
+        //this.data(JSONObject.toJSON(data));
         this.data(data);
         return this;
     }
@@ -56,6 +59,31 @@ public class SystemResponse extends JSONObject {
         this.message("系统错误");
         this.count("0");
         this.data(new ArrayList<>());
+        return this;
+    }
+    public SystemResponse addMsgSuccess() {
+        this.put("message", "添加成功");
+        return this;
+    }
+    public SystemResponse delMsgSuccess() {
+        this.put("message", "删除成功");
+        return this;
+    }
+    public SystemResponse delMsgFail() {
+        this.put("message", "删除失败");
+        return this;
+    }
+    public SystemResponse updateMsgSuccess() {
+        this.put("message", "修改成功");
+        return this;
+    }
+    public SystemResponse updateMsgFail() {
+        this.put("message", "修改失败");
+        return this;
+    }
+
+    public SystemResponse approveSuccess(){
+        this.put("message", "发起审批成功");
         return this;
     }
 }

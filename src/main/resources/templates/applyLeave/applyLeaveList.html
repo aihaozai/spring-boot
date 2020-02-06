@@ -1,0 +1,86 @@
+<div class="layadmin-tabsbody-item layui-show">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card layui-card-body">
+                <div class="layui-layout">
+                        <div class="div-head">
+                            <div class="div-inline head-title" ><p><span class="p_span">请假列表</span></p><span class="p_area"></span></div>
+                            <div class="div-inline div-center" style="right: 0">
+                                <shiro:hasPermission name="leave:apply">
+                                <button id="addLeave" lay-page-jump="parentJump" type="button" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">申请</button>
+                                </shiro:hasPermission>
+                            </div>
+                        </div>
+                        <div class="layui-table-box">
+                            <table id="applyLeaveTable" class="layui-table" style="display: none"  lay-filter="applyLeaveTable"></table>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="leaveBar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="edit">编辑</a>
+    <a class="layui-btn layui-btn-danger layui-btn-xs" lay-event="del">删除</a>
+</script>
+<script data-th-inline="none" type="text/javascript">
+    layui.config({
+        base: './layui/'
+    }).use(['table','layer','form','element','page'], function() {
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        var element = layui.element;
+        var page = layui.page;
+        layer.load(2);
+        var renderTable = function () {
+            table.render({
+                elem: '#applyLeaveTable'
+                , url: '/applyLeave/getApplyLeavePage'
+                , cols: [[
+                    {field: 'username', title: '申请人'},
+                    {field: 'organName', title: '所属机构'},
+                    {field: 'typeName', title: '请假类型'},
+                    {field: 'statusName', title: '审批状态'},
+                    {field: 'createTime', title: '申请时间'},
+                    {fixed: 'right', title: '操作', width: 165, align:'center', toolbar: '#leaveBar'}
+                ]]
+                , page: true
+                , limit: 10   //默认十条数据一页
+                , limits: [10, 20, 30, 50]  //数据分页条
+                , where: {'data':{'asc':'createTime'}}
+                , done: function (res, curr, count) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+        };
+        renderTable();
+        $('#addLeave').click(function () {
+            page.loadPage($(this),'applyLeave/addLeave',{"type":"add"})//点击当前元素,post请求url,传递参数Json
+        });
+        //监听工具条
+        table.on('tool(applyLeaveTable)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if(layEvent==='detail'){
+                page.loadPage($('#addLeave'),'applyLeave/addLeave',{"id":data.id,"type":"detail"});
+            }
+            if(layEvent==='edit'){
+                if(data.approveStatus!=='approveW'){
+                    layer.msg('未审核才能编辑');
+                    return;
+                }
+                page.loadPage($('#addLeave'),'applyLeave/addLeave',{"id":data.id,"type":"edit"});
+            }
+        });
+    });
+</script>

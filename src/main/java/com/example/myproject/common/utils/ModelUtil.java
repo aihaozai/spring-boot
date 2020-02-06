@@ -11,6 +11,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class ModelUtil {
+    private String id;
     private String name;
     private String description;
     private Integer revision;

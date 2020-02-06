@@ -1,13 +1,18 @@
 package com.example.myproject.service.impl;
 
-import com.example.myproject.common.annotation.TargetDataSource;
+import com.alibaba.fastjson.JSON;
+import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.common.baseDao.AllDao;
 import com.example.myproject.common.utils.UUIDUtil;
 import com.example.myproject.entity.Menu;
-import com.example.myproject.entity.Page;
+import com.example.myproject.entity.MenuPermission;
+import com.example.myproject.common.pojo.Page;
+import com.example.myproject.entity.PermissionRole;
 import com.example.myproject.service.IMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
+import javax.transaction.Transactional;
 import java.util.List;
 import java.util.Map;
 
@@ -21,15 +26,17 @@ public class MenuServiceImpl implements IMenuService {
     @Autowired
     private AllDao.MenuDao menuDao;
     @Autowired
-    private AllDao.PersonMenuViewDao personMenuViewDao;
+    private AllDao.MenuPermissionDao menuPermissionDao;
+    @Autowired
+    private AllDao.PermissionRoleDao permissionRoleDao;
     @Override
     public Map findAllMenuByPage(Page page) {
         return menuDao.findListByPage(page);
     }
 
     @Override
-    public List getMenuType(String menuType) {
-        return menuDao.findListFiledForOneDistinct(menuType);
+    public List<String> getMenuType(String menuType) {
+        return menuDao.findListFiledForDistinct(menuType);
     }
 
     @Override
@@ -38,8 +45,8 @@ public class MenuServiceImpl implements IMenuService {
     }
 
     @Override
-    public Menu getOneMenuType(String menuId, String id) {
-        return menuDao.findSingleBeanByFiled(menuId,id);
+    public Menu getMenuTypeById(String id) {
+        return menuDao.findByID(id);
     }
 
     @Override
@@ -54,7 +61,7 @@ public class MenuServiceImpl implements IMenuService {
 
     @Override
     public void delMenu(String id) {
-        List<String> list = menuDao.findListByFiledForOne("menuId","pid",id);
+        List<String> list = menuDao.findListByFiled("menuId","pid",id);
         delChildren(list);
         menuDao.deleteByFiled("menuId",id);
     }
@@ -65,7 +72,7 @@ public class MenuServiceImpl implements IMenuService {
     }
 
     @Override
-    public List getCurrentMenuType(Menu menu) {
+    public List<Menu> getCurrentMenuType(Menu menu) {
         //查询该菜单是否含有子菜单
         List<Menu> list = menuDao.findListByFiled("pid",menu.getMenuId());
         if(list.size()>0)return null;
@@ -73,18 +80,75 @@ public class MenuServiceImpl implements IMenuService {
     }
 
     @Override
-    public Integer updateMenuByFiled(String tField, String tValue, String field, String value) {
-        return menuDao.updateByFiled(tField,tValue,field,value);
-    }
-
-    @Override
     public Map findListByPage(Page page) {
         return menuDao.findListByPage(page);
     }
 
+    @Override
+    public Map findMenuPermission(Page page) {
+        return menuPermissionDao.findListByPage(page);
+    }
+
+    @Transactional
+    @Override
+    public void saveMenuPermission(MenuPermission menuPermission) {
+        menuPermission.setId(UUIDUtil.randomUUID());
+        menuPermissionDao.save(menuPermission);
+    }
+
+    @Transactional
+    @Override
+    public Integer updateMenuPermissionById(String id, String field, String value) throws Exception {
+        return menuPermissionDao.updateById(id,field,value);
+    }
+
+    @Transactional
+    @Override
+    public void delMenuPermission(String id) {
+        menuPermissionDao.delete(id);
+    }
+
+    @Override
+    public String authAllMenuPermission(JSONObject jsonObject) {
+        List<MenuPermission> permissionList = menuPermissionDao.findListByFiled("menuId",jsonObject.getString("menuId"));
+        if(jsonObject.getString("checked").equals("true")){
+            for(MenuPermission permission:permissionList){
+                PermissionRole permissionRole = new PermissionRole();
+                permissionRole.setId(UUIDUtil.randomUUID());
+                permissionRole.setRoleId(jsonObject.getString("roleId"));
+                permissionRole.setRoleName(jsonObject.getString("roleName"));
+                permissionRole.setMenuId(permission.getMenuId());
+                permissionRole.setRolePermission(permission.getId());
+                permissionRoleDao.save(permissionRole);
+            }
+            return "授权成功";
+        }else {
+            permissionRoleDao.deleteByFiled("menuId",jsonObject.getString("menuId"));
+            return "取消授权成功";
+        }
+    }
+
+    @Override
+    public String authMenuPermission(JSONObject jsonObject) {
+        if(jsonObject.getString("checked").equals("true")){
+            PermissionRole permissionRole = JSON.toJavaObject(jsonObject,PermissionRole.class);
+            permissionRole.setId(UUIDUtil.randomUUID());
+            permissionRoleDao.save(permissionRole);
+            return "授权成功";
+        }else {
+            permissionRoleDao.deleteByFiled("rolePermission",jsonObject.getString("rolePermission"));
+            return "取消授权成功";
+        }
+    }
+
+    @Override
+    public Menu getMenuTypeByField(String menuId, String menuId1) {
+        return menuDao.findSingleBeanByFiled(menuId,menuId1);
+    }
+
     private void delChildren(List<String> list){
         for (String childrenId:list){
-            List<String> childrenList = menuDao.findListByFiledForOne("menuId","pid",childrenId);
+            List<String> childrenList = menuDao.findListByFiled("menuId","pid",childrenId);
             delChildren(childrenList);
             menuDao.deleteByFiled("menuId",childrenId);
         }

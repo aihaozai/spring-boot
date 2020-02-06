@@ -2,6 +2,7 @@ layui.define(['layer', 'table'], function (exports) {
     var $ = layui.jquery;
     var layer = layui.layer;
     var table = layui.table;
+    var keyName;
     var treetable = {
         // 渲染树形表格
         render: function (param) {
@@ -9,6 +10,7 @@ layui.define(['layer', 'table'], function (exports) {
             if (!treetable.checkParam(param)) {
                 return;
             }
+            keyName=param.treeIdName;
             // 获取数据
             if (param.data) {
                 treetable.init(param, param.data);
@@ -48,11 +50,11 @@ layui.define(['layer', 'table'], function (exports) {
                 for (var i = 0; i < data.length; i++) {
                     if (data[i].pid == s_pid) {
                         var len = mData.length;
-                        if (len > 0 && mData[len - 1].menuId == s_pid) {
+                        if (len > 0 && mData[len - 1][keyName] == s_pid) {
                             mData[len - 1].isParent = true;
                         }
                         mData.push(data[i]);
-                        sort(data[i].menuId, data);
+                        sort(data[i][keyName], data);
                     }
                 }
             };
@@ -62,7 +64,7 @@ layui.define(['layer', 'table'], function (exports) {
             param.url = undefined;
             param.data = mData;
             param.cols[0][param.treeColIndex].templet = function (d) {
-                var mId = d.menuId;
+                var mId = d[keyName];
                 var mPid = d.pid;
                 var isDir = d.isParent;
                 var emptyNum = treetable.getEmptyNum(mPid, mData);
@@ -94,7 +96,7 @@ layui.define(['layer', 'table'], function (exports) {
                 res.limit = param.limit;
                 res.page = param.page;
                 if (doneCallback) {
-                    doneCallback(res, curr, count);
+                    doneCallback(res, curr, count,this);
                 }
             };
             // 渲染表格
@@ -109,7 +111,7 @@ layui.define(['layer', 'table'], function (exports) {
             }
             var tPid;
             for (var i = 0; i < data.length; i++) {
-                if (pid == data[i].menuId) {
+                if (pid == data[i][keyName]) {
                     num += 1;
                     tPid = data[i].pid;
                     break;

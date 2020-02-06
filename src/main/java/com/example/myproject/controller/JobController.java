@@ -1,10 +1,10 @@
 package com.example.myproject.controller;
 
-//import com.example.myproject.common.Scheduled.JobUtil;
+
 import com.example.myproject.common.Scheduled.JobService;
 import com.example.myproject.common.Scheduled.ScheduleJob;
 import com.example.myproject.common.utils.UUIDUtil;
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.SystemResponse;
 import com.example.myproject.service.IScheduleJobService;
 import org.apache.commons.lang3.StringUtils;
@@ -12,9 +12,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
 /**

@@ -3,6 +3,8 @@ package com.example.myproject.service;
 import com.example.myproject.entity.MenuPermission;
 import com.example.myproject.entity.User;
 import com.example.myproject.entity.UserRole;
+import com.example.myproject.entity.view.MenuPermissionRoleView;
+import com.example.myproject.entity.view.UserLoginView;
 
 import java.util.List;
 
@@ -12,9 +14,9 @@ import java.util.List;
  * @Create: 2019-11-01 14:30
  **/
 public interface IShiroService {
-    User findByFiled (String filed,Object object);
+    UserLoginView findByFiled (String filed, Object object);
 
     List<UserRole> findListByFiled (String filed, Object object);
 
-    List<MenuPermission> findListByFiledIn (String filed, List<Object> list);
+    List<MenuPermissionRoleView> findListByFiledIn (String filed, List<String> list);
 }

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en" xmlns:th="http://www.thymeleaf.org"   xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
 <head>
     <meta charset="utf-8">
     <title>权限系统</title>
@@ -9,15 +9,43 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
-    <link rel="stylesheet" th:href="@{layui/css/layui.css}" media="all">
-    <link rel="stylesheet" th:href="@{layui/css/treetable.css}" media="all">
-    <link rel="stylesheet" th:href="@{system/css/admin.css}" media="all">
-    <link rel="stylesheet" th:href="@{system/css/shrink.css}" media="all">
-    <link rel="stylesheet" th:href="@{system/css/system.css}" media="all">
+    <!-- layui -->
+    <link rel="stylesheet" th:href="@{layui/css/layui.css}" media="all"/>
+    <link rel="stylesheet" th:href="@{system/css/admin.css}" media="all"/>
+    <!-- 树形表格css -->
+    <link rel="stylesheet" th:href="@{layui/css/treetable.css}" media="all"/>
+    <!-- 缩放css -->
+    <link rel="stylesheet" th:href="@{system/css/shrink.css}" media="all"/>
+    <!-- 系统css -->
+    <link rel="stylesheet" th:href="@{system/css/system.css}" media="all"/>
+    <!-- table增强版css -->
+    <link rel="stylesheet" th:href="@{system/css/soulTable.css}" media="all"/>
+    <!-- 离线百度地图css -->
+    <link rel="stylesheet" type="text/css"  th:href="@{baidumap/css/bmap.css}" media="all"/>
+    <!-- 日历fullcalendar-css -->
+    <link rel="stylesheet" type="text/css"  th:href="@{fullcalendar/core/main.css}" media="all"/>
+    <link rel="stylesheet" type="text/css"  th:href="@{fullcalendar/daygrid/main.css}" media="all"/>
+    <link rel="stylesheet" type="text/css"  th:href="@{fullcalendar/timegrid/main.css}" media="all"/>
+    <link rel="stylesheet" type="text/css"  th:href="@{fullcalendar/list/main.css}" media="all"/>
+
+    <!-- jq -->
     <script th:src="@{system/modules/jquery-3.4.1.min.js}"></script>
-    <script th:src="@{system/modules/monitor.js}"></script>
+    <!-- websocket -->
+    <script th:src="@{system/modules/sockjs.js}"></script>
+    <!-- 时间工具类 -->
     <script th:src="@{system/modules/timeUtil.js}"></script>
-    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=9nFuVmZkignxQOh4L00wmBEm8edD53rl"></script>
+    <!-- 复制黏贴类 -->
+    <script th:src="@{system/modules/clipboard.min.js}"></script>
+    <!-- 离线百度地图 -->
+    <script type="text/javascript" th:src="@{baidumap/js/apiv2.0.3.min.js}"></script>
+    <script type="text/javascript" th:src="@{baidumap/js/findtiles.js}"></script>
+    <!--    <script type="text/javascript" src="http://api.map.baidu.com/api?v=3.0&ak=9nFuVmZkignxQOh4L00wmBEm8edD53rl"></script>-->
+    <!-- 日历fullcalendar-4.3.1 -->
+    <script type="text/javascript" th:src="@{fullcalendar/core/main.js}"></script>
+    <script type="text/javascript" th:src="@{fullcalendar/daygrid/main.js}"></script>
+    <script type="text/javascript" th:src="@{fullcalendar/interaction/main.js}"></script>
+    <script type="text/javascript" th:src="@{fullcalendar/timegrid/main.js}"></script>
+    <script type="text/javascript" th:src="@{fullcalendar/list/main.js}"></script>
     <style>
         .layui-form-select dl  {
             position: absolute;
@@ -26,6 +54,7 @@
     </style>
 </head>
 <div id="main" class="layadmin-tabspage-none"></div>
+
 <script th:src="@{layui/layui.js}"></script>
 <script th:inline="javascript">
     console.log([[${roles}]]);
@@ -34,6 +63,6 @@
         layui.config({
             base: './system/',
             debug: true
-        }).use(['index']);
+        }).use(['index','websocket']);
 </script>
 </html>

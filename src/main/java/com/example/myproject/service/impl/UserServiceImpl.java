@@ -2,7 +2,7 @@ package com.example.myproject.service.impl;
 
 import com.example.myproject.common.baseDao.AllDao;
 import com.example.myproject.common.utils.UUIDUtil;
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.User;
 import com.example.myproject.entity.UserRole;
 import com.example.myproject.service.IUserService;

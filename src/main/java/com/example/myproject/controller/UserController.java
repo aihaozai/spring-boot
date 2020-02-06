@@ -1,6 +1,6 @@
 package com.example.myproject.controller;
 
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.SystemResponse;
 import com.example.myproject.entity.User;
 import com.example.myproject.service.IUserService;

@@ -1,7 +1,9 @@
 package com.example.myproject.service;
 
+import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.entity.Menu;
-import com.example.myproject.entity.Page;
+import com.example.myproject.entity.MenuPermission;
+import com.example.myproject.common.pojo.Page;
 
 import java.util.List;
 import java.util.Map;
@@ -9,11 +11,11 @@ import java.util.Map;
 public interface IMenuService {
     Map findAllMenuByPage(Page page);
 
-    List getMenuType(String menuType);
+    List<String> getMenuType(String menuType);
 
     List<Menu> getParentMenu(String field,Object value);
 
-    Menu getOneMenuType(String menuId, String id);
+    Menu getMenuTypeById(String id);
 
     void saveMenu(Menu menu);
 
@@ -21,9 +23,21 @@ public interface IMenuService {
 
     Integer updateMenuById(String id,String filed,String value) throws Exception;
 
-    List getCurrentMenuType(Menu menu);
-
-    Integer updateMenuByFiled(String tField, String tValue, String field, String value);
+    List<Menu> getCurrentMenuType(Menu menu);
 
     Map findListByPage(Page page);
+
+    Map findMenuPermission(Page page);
+
+    void saveMenuPermission(MenuPermission menuPermission);
+
+    Integer updateMenuPermissionById(String id, String field, String value) throws Exception;
+
+    void delMenuPermission(String id);
+
+    String authAllMenuPermission(JSONObject jsonObject);
+
+    String authMenuPermission(JSONObject jsonObject);
+
+    Menu getMenuTypeByField(String menuId, String menuId1);
 }

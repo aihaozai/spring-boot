@@ -19,7 +19,7 @@ import java.util.Map;
 @Service
 public class ExportServiceImpl implements IExportService {
     @Autowired
-    private AllDao.PersonRoleDao personRoleDao;
+    private AllDao.MenuRoleDao menuRoleDao;
 
     @TargetDataSource(name = "orcl")
     @Override
@@ -36,6 +36,6 @@ public class ExportServiceImpl implements IExportService {
                 " inner JOIN user_col_comments uc" +
                 " on ut.TABLE_NAME  = uc.table_name and ut.COLUMN_NAME = uc.column_name and ut.TABLE_NAME='"+tableName+"'" +
                 " order by ut.Table_Name";
-        return personRoleDao.getListMapBySQLQuery(sql);
+        return menuRoleDao.getListMapBySQLQuery(sql);
     }
 }

@@ -1,10 +1,8 @@
-
-<div class=" layui-show" style="overflow: hidden">
+<div class="layadmin-tabsbody-item layui-show" style="overflow: hidden">
     <div class="layui-fluid">
         <div class="layui-row layui-col-space15">
-            <div class="layui-card">
-                <div class="layui-card-body">
-                    <div class="layui-layout">
+            <div class="layui-card layui-card-body">
+                <div class="layui-layout">
                         <div class="div-head">
                             <div class="layui-form" style="float: right;width: 14%">
                                 <select id="imageType" lay-filter="imageType">
@@ -18,15 +16,12 @@
                             <ul class="flow-default scroll-list" id="meiZiImage" ></ul>
                         </div>
                     </div>
-                </div>
             </div>
         </div>
     </div>
 </div>
 <script data-th-inline="none" type="text/javascript">
-    layui.config({
-        base: './layui/'
-    }).use(['flow','layer','form'], function(){
+    layui.use(['flow','layer','form'], function(){
         var $ = layui.jquery;
         var flow = layui.flow;
         var layer = layui.layer;

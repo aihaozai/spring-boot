@@ -1,6 +1,6 @@
 package com.example.myproject.common.utils;
 
-import com.example.myproject.entity.MenuTree;
+import com.example.myproject.common.pojo.MenuTree;
 import com.example.myproject.entity.view.PersonMenuView;
 
 import java.util.ArrayList;
@@ -12,18 +12,18 @@ import java.util.List;
  * @Create: 2019-09-11 15:23
  **/
 public class MenuTreeUtil {
+    public static String Pid = "0";
     protected MenuTreeUtil() {
 
     }
-    public static List<MenuTree> buildMenuTree(List<PersonMenuView> personMenuViews){
+    public static List<MenuTree> buildMenuTree(String Pid,List<PersonMenuView> personMenuViews){
         List<MenuTree> menuTreeList = new ArrayList<>();
         for (PersonMenuView view : personMenuViews){
-            if(view.getPid().equals("0")) {
+            if(view.getPid().equals(Pid)) {
                 MenuTree newMenuTree = getMenu(view);
-                List<PersonMenuView> pmv = new ArrayList<>();
-                pmv.addAll(personMenuViews);
+                List<PersonMenuView> pmv = new ArrayList<>(personMenuViews);
                 pmv.remove(view);
-                newMenuTree.setChildrens(buildChildMenuTree(newMenuTree,pmv));
+                newMenuTree.setChildrens(buildMenuTree(newMenuTree.getMenuId(),pmv));
                 menuTreeList.add(newMenuTree);
             }
         }
@@ -35,8 +35,7 @@ public class MenuTreeUtil {
         for (PersonMenuView view : personMenuViews){
             if(menuTree.getMenuId().equals(view.getPid())) {
                 MenuTree newMenuTree = getMenu(view);
-                List<PersonMenuView> pmv = new ArrayList<>();
-                pmv.addAll(personMenuViews);
+                List<PersonMenuView> pmv = new ArrayList<>(personMenuViews);
                 pmv.remove(view);
                 newMenuTree.setChildrens(buildChildMenuTree(newMenuTree,pmv));
                 menuTreeList.add(newMenuTree);

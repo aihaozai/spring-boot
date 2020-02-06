@@ -3,14 +3,13 @@ package com.example.myproject.service.impl;
 import com.example.myproject.common.Scheduled.JobService;
 import com.example.myproject.common.Scheduled.ScheduleJob;
 import com.example.myproject.common.baseDao.AllDao;
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.SystemResponse;
 import com.example.myproject.service.IScheduleJobService;
 import org.quartz.SchedulerException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Map;
 
 /**

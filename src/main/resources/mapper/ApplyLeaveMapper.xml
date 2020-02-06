@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.myproject.mapper.ApplyLeaveMapper">
+    <resultMap id="BaseResultMap" type="com.example.myproject.entity.ApplyLeave">
+        <id column="id" jdbcType="VARCHAR" property="id" />
+        <result column="apply_user" jdbcType="VARCHAR" property="applyUser" />
+        <result column="user_organ" jdbcType="VARCHAR" property="userOrgan" />
+        <result column="leave_type" jdbcType="VARCHAR" property="leaveType" />
+        <result column="approve_status" jdbcType="VARCHAR" property="approveStatus" />
+        <result column="apply_reason" jdbcType="VARCHAR" property="applyReason" />
+        <result column="start_time" jdbcType="VARCHAR" property="startTime" />
+        <result column="end_time" jdbcType="VARCHAR" property="endTime" />
+        <result column="create_time" jdbcType="VARCHAR" property="createTime" />
+    </resultMap>
+
+    <update id="updateApplyLeave" parameterType="com.example.myproject.entity.ApplyLeave" >
+        UPDATE apply_leave
+        <set>
+            <if test="leaveType != null">leave_type=#{leaveType},</if>
+            <if test="applyReason != null">apply_reason=#{applyReason}</if>
+        </set>
+        WHERE id = #{id}
+    </update>
+</mapper>

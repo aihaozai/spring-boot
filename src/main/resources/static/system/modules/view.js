@@ -96,6 +96,18 @@ layui.extend({
                     }
                 });
             };
+            self.loadPostHtml = function (url,data,callback) {
+                $.ajax({
+                    type: "POST",
+                    url: url,
+                    contentType:"application/json;charset=UTF-8",
+                    data: JSON.stringify(data),
+                    dataType: 'html',
+                    success: function (r) {
+                        callback({html: r, url: url});
+                    }
+                });
+            };
             self.fillHtml = function (url, htmlElem, modeName) {
                 var title = '';
                 var container = self.containerBody || self.container;
@@ -134,6 +146,19 @@ layui.extend({
                     }
                     layui.system.appBody = self.containerBody;
                     if ($.isFunction(callback)) callback()
+                })
+            };
+            self.renderPage = function (url,data,tabUrl,dom,callback) {
+                if (url === undefined) return;
+                self.pageBody = $('#' + conf.pageBody);
+                self.loadPostHtml(url,data,function (res) {
+                    var htmlElem = $('<div class="layui-body container-page-hide" lay-parent-url="'+tabUrl+'" lay-url="'+res.url+'">' + res.html + '</div>');
+                    if(dom.attr('lay-page-jump')==="childrenJump") {
+                       var url = dom.closest('.layui-body').attr("lay-url");
+                        htmlElem.attr("lay-cParent-url",url);
+                    }
+                    $('#' + conf.pageBody).append(htmlElem);
+                    if ($.isFunction(callback)) callback(dom);
                 })
             };
             exports('view', self)

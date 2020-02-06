@@ -1,12 +1,11 @@
 <div class="layadmin-tabsbody-item layui-show">
     <div class="layui-fluid">
         <div class="layui-row layui-col-space15">
-            <div class="layui-card">
-                <div class="layui-card-body">
-                    <div class="layui-layout">
+            <div class="layui-card layui-card-body" style="height: 100%;overflow: auto">
+                <div class="layui-layout">
                         <div class="div-head">
-                            <div class="div-inline div-center" style="left: 4%"><p class="div-inline">定时任务管理</p></div>
-                            <div class="div-inline div-center" style="left: 97%">
+                            <div class="div-inline head-title"><p><span class="p_span">定时任务管理</span></p><span class="p_area"></span></div>
+                            <div class="div-inline div-center" style="right: 0">
                                 <button id="addJob" type="button" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">添加</button>
                             </div>
                         </div>
@@ -14,7 +13,6 @@
                             <table id="jobTable" class="layui-table" style="display: none" lay-filter="jobTable"></table>
                         </div>
                     </div>
-                </div>
             </div>
         </div>
     </div>

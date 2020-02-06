@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <link rel="stylesheet" th:href="@{/system/css/system.css}" media="all">
+    <script th:src="@{/system/modules/jquery-3.4.1.min.js}"></script>
+    <script th:src="@{/layui/layui.js}"></script>
+</head>
+<body>
+<div id="chooseLeader">
+    <input type="hidden" id="taskId"  class="layui-input" >
+    <input type="hidden" id="comment"  class="layui-input" >
+<li class="layui-nav-item" lay-unselect="">
+    <dl class="layui-nav-system">
+        <dd th:each="data:${leaders}" style="text-align: center;"><a style="cursor:pointer;" th:value="${data.id}" th:text="${data.username}+'（'+${data.roleName}+'）'"></a><hr><dd>
+    </dl>
+</li>
+</div>
+</body>
+<script data-th-inline="none" type="text/javascript" th:inline="javascript">
+    layui.use(['layer'],function () {
+        var layer = layui.layer;
+        $('#chooseLeader a').click(function () {
+            var data = {
+                "taskId": $("#taskId").val(),
+                "assignee": $(this).attr("value"),
+                "comment": $("#comment").val()
+            };
+            $.ajax({
+                type: "POST",
+                url: "/task/agreeTask",
+                contentType:"application/json;charset=UTF-8",
+                data: JSON.stringify(data),
+                dataType:"json",
+                success: function (res) {
+                    layer.msg(res.message);
+                    if(res.code==='success'){
+                        parent.layer.close(parent.layer.getFrameIndex(window.name));
+                    }
+                }
+            });
+        });
+    });
+</script>

@@ -3,19 +3,18 @@ package com.example.myproject.controller;
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.common.baseController.BaseController;
-import com.example.myproject.common.baseDao.AllDao;
 import com.example.myproject.common.utils.MenuTreeUtil;
-import com.example.myproject.common.utils.TestUtils;
 import com.example.myproject.common.utils.TransformUtil;
-import com.example.myproject.entity.MenuTree;
+import com.example.myproject.common.pojo.MenuTree;
 import com.example.myproject.entity.SystemResponse;
-import com.example.myproject.entity.User;
 import com.example.myproject.entity.view.PersonMenuView;
 import com.example.myproject.common.shiro.ShiroHelper;
+import com.example.myproject.entity.view.UserLoginView;
+import com.example.myproject.service.IActHiTaskProcessService;
 import com.example.myproject.service.IRoleService;
+import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.*;
 import org.apache.shiro.authz.AuthorizationInfo;
-import org.apache.shiro.authz.annotation.RequiresPermissions;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -24,6 +23,8 @@ import org.springframework.web.bind.annotation.*;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
+import static com.example.myproject.common.utils.MenuTreeUtil.Pid;
 
 
 /**
@@ -36,6 +37,9 @@ public class LoginController extends BaseController {
 
     @Autowired
     private IRoleService roleServiceImpl;
+    @Autowired
+    private IActHiTaskProcessService hiTaskProcessServiceImpl;
+
     @Autowired
     private ShiroHelper shiroHelper;
 
@@ -76,7 +80,7 @@ public class LoginController extends BaseController {
             HashMap hashMap = new HashMap();
             hashMap.put("asc","sort");
             List<PersonMenuView> personMenuViews =roleServiceImpl.findListByFiledIn("roleId", TransformUtil.CollectionToList(authorizationInfo.getRoles()),hashMap);
-            List<MenuTree> menuTreeList = MenuTreeUtil.buildMenuTree(MenuTreeUtil.distinctMenuTree(personMenuViews));
+            List<MenuTree> menuTreeList = MenuTreeUtil.buildMenuTree(Pid,MenuTreeUtil.distinctMenuTree(personMenuViews));
             return new SystemResponse().success().data(menuTreeList);
         }catch (Exception e){
             e.printStackTrace();
@@ -115,10 +119,18 @@ public class LoginController extends BaseController {
         return jsonObject;
     }
 
-//    @RequestMapping("/test")
-//    @ResponseBody
-//    public String test(){
-//         TestUtils.test();
-//         return "success";
-//    }
+    @ResponseBody
+    @PostMapping("/getInfo")
+    public SystemResponse getInfo(){
+        try {
+            JSONObject resultObject = new JSONObject();
+            UserLoginView userLoginView = (UserLoginView)SecurityUtils.getSubject().getPrincipal();
+            resultObject.put("userName",userLoginView.getUsername());
+            resultObject.put("dot",hiTaskProcessServiceImpl.getTaskCount(userLoginView.getId(),"N"));
+            return new SystemResponse().success().data(resultObject);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new SystemResponse().fail();
+        }
+    }
 }

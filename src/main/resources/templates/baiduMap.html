@@ -1,73 +1,100 @@
 <!DOCTYPE html>
-<html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
 <body>
 <div class="layadmin-tabsbody-item layui-show">
 	<div class="layui-fluid">
 		<div class="layui-row layui-col-space15">
-			<div class="layui-card">
-				<div class="layui-layout">
+			<div class="layui-card layui-layout">
+<!--                    <br>-->
+<!--                    <input type="button" value="findtiles" onclick="findtiles();">-->
+<!--                    <br>-->
+<!--                    <div id="list"></div>-->
 					<div id="allmap" style="width: 100%;height: 100%;overflow: hidden;margin: 0;font-family: 微软雅黑"></div>
-				</div>
 			</div>
 		</div>
 	</div>
 </div>
 </body>
-
-</html>
 <script th:inline="javascript">
 	layui.use(['layer'], function () {
 		var layer = layui.layer;
 		// 百度地图API功能
-		var map = new BMap.Map("allmap",{ logo:false}); // 创建Map实例
-		map.centerAndZoom(new BMap.Point(116.404, 39.915), 16); // 初始化地图,设置中心点坐标和地图级别
+		var map = new BMap.Map("allmap",{ logo:false,mapType: BMAP_NORMAL_MAP}); // 创建Map实例
+		var point = new BMap.Point(111.404, 40.915);
+		map.centerAndZoom(point, 5); // 初始化地图,设置中心点坐标和地图级别
 		//添加地图类型控件
-		map.addControl(new BMap.MapTypeControl({
+		map.addControl(new BMap.NavigationControl({
 			mapTypes: [
 				BMAP_NORMAL_MAP,
 				BMAP_HYBRID_MAP
 			]
 		}));
+		var marker = new BMap.Marker(point);
+		map.addOverlay(marker);
 		map.setCurrentCity("北京"); // 设置地图显示的城市 此项是必须设置的
 		map.enableScrollWheelZoom(true); //开启鼠标滚轮缩放
-		//定位到当前位置
-		var geolocation = new BMap.Geolocation();
-		// 开启SDK辅助定位
-		geolocation.enableSDKLocation();
-		var gc = new BMap.Geocoder();//地址解析类
-		geolocation.getCurrentPosition(function(r){
-			if(this.getStatus() == BMAP_STATUS_SUCCESS){
-				var mk = new BMap.Marker(r.point);
-				map.addOverlay(mk);
-				map.panTo(r.point);
-				layer.msg('您的位置：' + r.point.lng + ',' + r.point.lat);
+		var polyline = new BMap.Polyline([
+			new BMap.Point(110.79212344879026, 35.51780870664358),
+			new BMap.Point(109.83546401288415, 33.56934263477264),
+			new BMap.Point(107.22304786098667, 33.507714581177126),
+			new BMap.Point(108.87880457697803, 31.60695628922403),
+			new BMap.Point(107.92214512833361, 29.666192343763417),
+			new BMap.Point(110.79212344879026, 30.51780870664358),
 
-				var pt = r.point;
-				map.panTo(pt);//移动地图中心点
-				//alert(r.point.lng);//X轴
-				//alert(r.point.lat);//Y轴
+		], {strokeColor:"blue", strokeWeight:2, strokeOpacity:0.5});
+		map.addOverlay(polyline);
 
-				gc.getLocation(pt, function(rs){
-					var addComp = rs.addressComponents;
-					//alert(addComp.city);
-					layer.msg(addComp.province + addComp.city + addComp.district + addComp.street + addComp.streetNumber, {
-						time:false,
-						btn: ['知道了','关闭']
-					});
-					layer.msg(addComp.province + addComp.city + addComp.district + addComp.street + addComp.streetNumber);
-				});
+		function addUrls(path, url){
+			var div = document.getElementById("list");
+			var anchor = document.createElement("a");
+			anchor.href = url;
+			anchor.innerHTML = path;
+			div.appendChild(anchor);
+			var br = document.createElement("br");
+			div.appendChild(br);
+		}
 
-			}
-			else {
-				layer.msg('定位失败:状态'+this.getStatus(), {
-					time:false,
-					btn: ['知道了','关闭']
-				});
-			}
-		});
+		function findtiles(){
+			document.getElementById("list").innerHTML = "";
+			var findAllTiles = downloadBaiduTiles();
+			findAllTiles(map, addUrls);
+		}
+
+		// //定位到当前位置
+		// var geolocation = new BMap.Geolocation();
+		// // 开启SDK辅助定位
+		// geolocation.enableSDKLocation();
+		// var gc = new BMap.Geocoder();//地址解析类
+		// geolocation.getCurrentPosition(function(r){
+		// 	if(this.getStatus() == BMAP_STATUS_SUCCESS){
+		// 		var mk = new BMap.Marker(r.point);
+		// 		map.addOverlay(mk);
+		// 		map.panTo(r.point);
+		// 		layer.msg('您的位置：' + r.point.lng + ',' + r.point.lat);
+        //
+		// 		var pt = r.point;
+		// 		map.panTo(pt);//移动地图中心点
+		// 		//alert(r.point.lng);//X轴
+		// 		//alert(r.point.lat);//Y轴
+        //
+		// 		gc.getLocation(pt, function(rs){
+		// 			var addComp = rs.addressComponents;
+		// 			//alert(addComp.city);
+		// 			layer.msg(addComp.province + addComp.city + addComp.district + addComp.street + addComp.streetNumber, {
+		// 				time:false,
+		// 				btn: ['知道了','关闭']
+		// 			});
+		// 			layer.msg(addComp.province + addComp.city + addComp.district + addComp.street + addComp.streetNumber);
+		// 		});
+        //
+		// 	}
+		// 	else {
+		// 		layer.msg('定位失败:状态'+this.getStatus(), {
+		// 			time:false,
+		// 			btn: ['知道了','关闭']
+		// 		});
+		// 	}
+		// });
 	});
 </script>
-<script type="text/javascript">
-
-
-</script>
+</html>

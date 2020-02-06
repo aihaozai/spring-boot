@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div class=" layui-show" style="background-color: green">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-layout">
+                        <div class="div-head">
+                            <div class="div-inline div-center" style="left: 4%"><p class="div-inline">测试2</p></div>
+                            <div class="div-inline div-center" style="left: 95%;width: 150px">
+                                <button id="cBackParent" type="button" lay-page-backParent="false" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">返回主体</button>
+                                <button id="backChildren" type="button" lay-page-backChildren href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">返回</button>
+
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+
+<script data-th-inline="none" type="text/javascript">
+    layui.use(['page'], function(){
+        var $ = layui.jquery;
+        var page = layui.page;
+
+    });
+</script>
+</html>

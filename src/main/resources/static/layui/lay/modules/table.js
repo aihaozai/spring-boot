@@ -687,7 +687,6 @@ layui.extend({
     };
     
     that.startTime = new Date().getTime(); //渲染开始时间
-
    if(options.data && options.data.constructor === Array){ //已知数据
       var res = {}
           ,startLimit = curr*options.limit - options.limit
@@ -796,7 +795,7 @@ layui.extend({
             if(item3.style) attr.push('style="'+ item3.style +'"'); //自定义样式
             if(item3.minWidth) attr.push('data-minwidth="'+ item3.minWidth +'"'); //单元格最小宽度
             if(item3.customize) attr.push('data-customize="'+ item3.customize +'"'); //我的自定义customize
-            if(item3.dataurl) attr.push('data-dataurl="'+ item3.dataurl +'"'); //我的自定义dataurl
+            if(item3.fun) attr.push('data-fun="'+ item3.fun +'"'); //我的自定义fun
             return attr.join(' ');
           }() +' class="'+ function(){ //追加样式
             var classNames = [];
@@ -1580,7 +1579,6 @@ layui.extend({
       ,field = othis.parent().data('field')
       ,index = othis.parents('tr').eq(0).data('index')
       ,data = table.cache[that.key][index];
-      
       data[field] = value; //更新缓存中的值
       
       layui.event.call(this, MOD_NAME, 'edit('+ filter +')', commonMember.call(this, {
@@ -1615,6 +1613,7 @@ layui.extend({
       var othis = $(this)
           ,field = othis.data('field')
           ,editType = othis.data('edit')
+          ,fun = othis.data('fun')
           ,customize = othis.data('customize')
           ,elemCell = othis.children(ELEM_CELL);
       if(othis.data('off')) return; //不触发事件
@@ -1631,8 +1630,8 @@ layui.extend({
         return;
       }
       //显示下拉单选框
-      if(editType=="dblSelect"){
-        cols.showSelect(othis,othis.data('dataurl'));
+      if(fun){
+        cols.switchFun(othis,fun);
         return;
       }
     }).on('mouseenter', 'td', function(){

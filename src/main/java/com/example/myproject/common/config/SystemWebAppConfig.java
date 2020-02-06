@@ -5,6 +5,7 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import com.example.myproject.common.HandlerInterceptor.SystemInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
 import org.springframework.http.converter.HttpMessageConverter;
@@ -12,6 +13,7 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ViewControllerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,12 +60,14 @@ public class SystemWebAppConfig implements WebMvcConfigurer {
         //WriteMapNullValue：是否输出值为null的字段,默认为false
         fastJsonConfig.setSerializerFeatures(
                 SerializerFeature.DisableCircularReferenceDetect,
-                SerializerFeature.WriteMapNullValue
+                SerializerFeature.WriteMapNullValue,
+                SerializerFeature.WriteDateUseDateFormat
         );
         fastConverter.setFastJsonConfig(fastJsonConfig);
         //将fastjson添加到视图消息转换器列表内
         converters.add(fastConverter);
     }
+
 
     /**
      * 拦截器

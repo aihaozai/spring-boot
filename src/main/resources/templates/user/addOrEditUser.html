@@ -42,15 +42,21 @@
                                 </div>
                             </div>
                             <div class="layui-form-item">
+                                <label class="layui-form-label">组织机构</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="tree" name="organId"  lay-filter="tree" class="layui-input" lay-verify="required">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
                                 <label class="layui-form-label">锁定</label>
                                 <div class="layui-input-block">
-                                    <input type="checkbox" id ="statusLock" name="statusLock" lay-skin="switch" th:value="${user.statusLock}" lay-text="锁定|有效">
+                                    <input type="checkbox" id ="statusLock" name="statusLock" lay-skin="switch" th:value="${user.statusLock}" lay-text="有效|锁定">
                                 </div>
                             </div>
                             <div class="layui-form-item" style="display: none">
                                 <div class="layui-input-block">
                                     <!-- 隐藏提交按钮，在父层中调用 -->
-                                    <a class="layui-btn" lay-filter="addUserForm" lay-submit >添加</a>
+                                    <button class="layui-btn" lay-filter="addUserForm" lay-submit >添加</button>
                                 </div>
                             </div>
                         </form>
@@ -62,13 +68,51 @@
 </div>
 </body>
 <script data-th-inline="none" type="text/javascript" th:inline="javascript">
-    layui.use(['form','layer','laydate'],function () {
+    layui.use(['form','layer','treeSelect'],function () {
         var form = layui.form;
         var layer = layui.layer;
+        var treeSelect = layui.treeSelect;
         var $ = layui.jquery;
         var flag = true;
-        if([[${user.statusLock}]]===0)$('#statusLock').attr("checked", true);
+        if([[${user.statusLock}]]===1)$('#statusLock').attr("checked", true);
         form.render('checkbox');
+        treeSelect.render({
+            // 选择器
+            elem: '#tree',
+            // 数据
+            data: '/organ/organTree',
+            // 异步加载方式：get/post，默认get
+            type: 'get',
+            // 占位符
+            placeholder: '',
+            // 是否开启搜索功能：true/false，默认false
+            search: true,
+            style: {
+                folder: {
+                    enable: false
+                },
+                line: {
+                    enable: true
+                }
+            },
+            // 点击回调
+            click: function(d){
+                //console.log(d);
+            },
+            // 加载完成后的回调函数
+            success: function (d) {
+                //选中节点，根据id筛选
+                if([[${user.organId}]].length>0){
+                    treeSelect.checkNode('tree', [[${user.organId}]]);
+                }
+//                获取zTree对象，可以调用zTree方法
+//                var treeObj = treeSelect.zTree('tree');
+//                console.log(treeObj);
+
+//                刷新树结构
+//                treeSelect.refresh('tree');
+            }
+        });
         $("#account").blur(function () {
             //检查账号名称是否存在
             if([[${user.account}]]!==$(this).val()&&$(this).val().length>0) {
@@ -92,7 +136,7 @@
         form.on('submit(addUserForm)',function (data) {
             if(flag) {
                 if (data.field.statusLock !== 1 || data.field.statusLock !== 0) {
-                    data.field.statusLock = data.field.statusLock === undefined ? '1' : '0';
+                    data.field.statusLock = data.field.statusLock === undefined ? '0' : '1';
                 }
                 var index = layer.load(1);
                 $.ajax({

@@ -1,6 +1,6 @@
 package com.example.myproject.common.utils;
 
-import com.example.myproject.entity.Mail;
+import com.example.myproject.common.pojo.Mail;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

@@ -19,7 +19,7 @@ public class MenuPermissionServiceImpl implements IMenuPermissionService {
     @Autowired
     private AllDao.MenuPermissionDao menuPermissionDao;
     @Override
-    public List<MenuPermission> findListByFiledIn(String filed, List<Object> list) {
+    public List<MenuPermission> findListByFiledIn(String filed, List<String> list) {
         return menuPermissionDao.findListByFiledIn(filed, list,new HashMap());
     }
 }

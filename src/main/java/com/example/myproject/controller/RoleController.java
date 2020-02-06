@@ -1,6 +1,6 @@
 package com.example.myproject.controller;
 
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.Person;
 import com.example.myproject.entity.SystemResponse;
 import com.example.myproject.service.IRoleService;
@@ -101,6 +101,18 @@ public class RoleController {
         }catch (Exception e){
             e.printStackTrace();
             return new SystemResponse().fail().message("删除失败");
+        }
+    }
+
+    @ResponseBody
+    @RequestMapping("/getPermissionRole")
+    public SystemResponse getPermissionRole(String menuId, String roleId){
+        try {
+            List list = roleServiceImpl.getPermissionRole(menuId,roleId);
+            return new SystemResponse().success().data(list);
+        }catch (Exception e){
+            e.printStackTrace();
+            return new SystemResponse().fail().message(e.getMessage());
         }
     }
 }

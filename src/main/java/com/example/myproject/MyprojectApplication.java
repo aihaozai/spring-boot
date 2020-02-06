@@ -10,9 +10,9 @@ import org.springframework.scheduling.annotation.EnableAsync;
 
 
 @EnableCaching
-@SpringBootApplication(scanBasePackages="com.example.myproject.*")    //exclude = {DataSourceAutoConfiguration.class} 禁用数据源自动配置
+@SpringBootApplication   //exclude = {DataSourceAutoConfiguration.class} 禁用数据源自动配置
 @Import({DynamicDataSourceRegister.class}) // 注册动态多数据源*/
-@MapperScan({"com.example.myproject.mapper","com.example.myproject.mapper1"})
+@MapperScan("com.example.myproject.mapper")
 public class MyprojectApplication {
 
     public static void main(String[] args) {

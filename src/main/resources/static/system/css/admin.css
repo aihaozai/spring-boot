@@ -86,7 +86,7 @@ html {
     left: 0;
     right: 0;
     overflow: hidden;
-    overflow-y: auto
+    /*overflow-y: auto*/
 }
 
 .layui-layout-admin .layui-header .layui-nav-img {
@@ -256,7 +256,7 @@ html {
 }
 
 .layui-header .layui-layout-right .layui-badge-dot {
-    margin-left: 11px
+    margin-left: 0
 }
 
 .layui-header .layui-nav .layui-this:after,.layui-layout-admin .layui-header .layui-nav-bar {
@@ -1359,7 +1359,12 @@ html {
     height: 100%;
 }
 .layui-fluid{
-    height: 93.5%;
+    height: 95.5%;
+}
+.layui-layer-white .layui-layer-title{
+    border: none;
+    background-color: #20222A;
+    color: #fff;
 }
 @media screen and (max-width:768px) {
     .layadmin-panel-selection {

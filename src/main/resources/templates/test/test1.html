@@ -1,0 +1,80 @@
+<div class=" layui-show" style="background-color: blue">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card">
+                <div class="layui-card-body">
+                    <div class="layui-layout">
+                        <div class="div-head">
+                            <div class="div-inline div-center" style="left: 4%"><p class="div-inline">测试1</p></div>
+                            <div class="div-inline div-center" style="left: 90%;width: 220px">
+                                <button id="childrenJump" type="button" lay-page-jump="childrenJump" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">再跳转</button>
+                                <button type="button" href="javascript:void(0)" lay-page-backParent="false" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">返回</button>
+                                <button type="button" href="javascript:void(0)" lay-page-backParent="true" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">返回并刷新</button>
+                            </div>
+                        </div>
+
+                        请输入目标名称：<input type="text" id = "targetName" />
+                        请输入：<textarea rows="3" cols="100" id="inputMsg" name="inputMsg"></textarea>
+                        <button id="doSend">发送</button>
+                        <div id="content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-inline="none" type="text/javascript">
+    layui.use(['page'], function(){
+        var $ = layui.jquery;
+        var page = layui.page;
+        $('#childrenJump').click(function () {
+            page.loadPage($(this),'test2',{})//点击当前元素,post请求url,传递参数Json
+        });
+
+    });
+</script>
+
+<script type="text/javascript">
+    var websocket = null;
+    if ('WebSocket' in window) {
+        //Websocket的连接
+        websocket = new WebSocket("ws://localhost:8082/websocket/socketServer");//WebSocket对应的地址
+    }
+    else if ('MozWebSocket' in window) {
+        //Websocket的连接
+        websocket = new MozWebSocket("ws://localhost:8082/websocket/socketServer");//SockJS对应的地址
+    }
+    else {
+        //SockJS的连接
+        websocket = new SockJS("http://localhost:8082/sockjs/socketServer");    //SockJS对应的地址
+    }
+    websocket.onopen = onOpen;
+    websocket.onmessage = onMessage;
+    websocket.onerror = onError;
+    websocket.onclose = onClose;
+
+    function onOpen(openEvt) {
+        //alert(openEvt.Data);
+    }
+
+    function onMessage(evt) {
+        $("#content").append(evt.data+"<br>"); // 接收后台发送的数据
+    }
+    function onError() {
+    }
+    function onClose() {
+    }
+
+    $('#doSend').click(function () {
+        if (websocket.readyState == websocket.OPEN) {
+            websocket.send($("#targetName").val()+"@"+$("#inputMsg").val());//调用后台handleTextMessage方法
+            alert("发送成功!");
+        } else {
+            alert("连接失败!"+websocket.readyState);
+        }
+    });
+
+    window.close = function () {
+        websocket.onclose();
+    }
+</script>

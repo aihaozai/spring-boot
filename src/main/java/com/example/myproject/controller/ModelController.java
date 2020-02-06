@@ -1,38 +1,29 @@
 package com.example.myproject.controller;
 
-import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.common.utils.ModelUtil;
-import com.example.myproject.entity.ActReModel;
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.utils.SystemStringUtil;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.SystemResponse;
-import com.example.myproject.service.IProcessService;
+import com.example.myproject.service.IModelService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import org.activiti.bpmn.converter.BpmnXMLConverter;
 import org.activiti.bpmn.model.BpmnModel;
-import org.activiti.bpmn.model.FlowElement;
 import org.activiti.editor.constants.ModelDataJsonConstants;
 import org.activiti.editor.language.json.converter.BpmnJsonConverter;
 import org.activiti.engine.RepositoryService;
-import org.activiti.engine.RuntimeService;
-import org.activiti.engine.TaskService;
 import org.activiti.engine.repository.Deployment;
 import org.activiti.engine.repository.Model;
-import org.apache.commons.lang.StringEscapeUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
-import org.w3c.dom.svg.SVGRenderingIntent;
+import org.springframework.web.servlet.ModelAndView;
 
 import javax.xml.stream.XMLInputFactory;
-import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamReader;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.io.UnsupportedEncodingException;
-import java.util.Collection;
-import java.util.List;
 import java.util.Map;
 
 /**
@@ -43,28 +34,30 @@ import java.util.Map;
 @Controller
 @RequestMapping("/model")
 public class ModelController {
-
-    @Autowired
-    private RuntimeService runtimeService;
-    @Autowired
-    private TaskService taskService;
     @Autowired
     private RepositoryService repositoryService;
     @Autowired
-    private IProcessService processServiceImpl;
+    private IModelService modelServiceImpl;
     @Autowired
     ObjectMapper objectMapper;
 
-    @RequestMapping("/processList")
-    public String processList(){
-        return "process/processList";
+    @RequestMapping("/modelList")
+    public String modelList(){
+        return "model/modelList";
+    }
+
+    @RequestMapping("/modelView")
+    public ModelAndView modelView(String id){
+        ModelAndView modelAndView = new ModelAndView("model/modelView");
+        modelAndView.addObject("model",new ModelUtil());
+        return modelAndView;
     }
 
     @ResponseBody
     @RequestMapping("/getModelsPage")
     public SystemResponse getModelsPage(Page page){
         try {
-            Map map =  processServiceImpl.findListByPage(page);
+            Map map =  modelServiceImpl.findListByPage(page);
             return new SystemResponse().pageData(map.get("count"),map.get("data"));
         }catch (Exception e){
             e.printStackTrace();
@@ -120,11 +113,12 @@ public class ModelController {
             String key = bpmnModel.getMainProcess().getId();
             ObjectNode modelNode = objectMapper.createObjectNode();
             modelNode.put(ModelDataJsonConstants.MODEL_NAME, modelUtil.getName());
-            modelNode.put(ModelDataJsonConstants.MODEL_DESCRIPTION, modelUtil.getDescription());
+            modelNode.put(ModelDataJsonConstants.MODEL_DESCRIPTION, SystemStringUtil.isEmpty(modelUtil.getDescription()));
             modelNode.put(ModelDataJsonConstants.MODEL_REVISION, modelUtil.getRevision());
             model.setName(modelUtil.getName());
             model.setKey(key);
             model.setMetaInfo(modelNode.toString());
+            model.setVersion(modelUtil.getRevision());
             repositoryService.saveModel(model);
             repositoryService.addModelEditorSource(model.getId(),jsonNode.toString().getBytes("utf-8"));
             return new SystemResponse().success();
@@ -164,7 +158,19 @@ public class ModelController {
             return new SystemResponse().success().message("发布流程成功");
         }catch (Exception e){
             e.printStackTrace();
-            return new SystemResponse().fail().error();
+            return new SystemResponse().fail().data(e.getMessage());
+        }
+    }
+
+    @PostMapping("/delModel")
+    @ResponseBody
+    public SystemResponse delModel(@RequestParam String id) {
+        try {
+            repositoryService.deleteModel(id);
+            return new SystemResponse().success().delMsgSuccess();
+        }catch (Exception e){
+            e.printStackTrace();
+            return new SystemResponse().fail().data(e.getMessage());
         }
     }
 }

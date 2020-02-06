@@ -1,0 +1,141 @@
+<div class="layadmin-tabsbody-item layui-show" xmlns:th="http://www.w3.org/1999/xhtml">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card layui-card-body">
+                <div class="layui-layout" id="leaveLayout">
+                        <form class="layui-form" lay-filter="leave">
+                            <div class="div-head">
+                            <div class="div-inline head-title" style="left: 4%"><p><span class="p_span">请假申请</span></p><span class="p_area"></span></div>
+                            <div class="div-inline div-center" style="right: 0;">
+                                <button type="button" href="javascript:void(0)" lay-page-backParent="true" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">返回</button>
+                                <button id="save" type="button" href="javascript:void(0)" lay-check-view="detail|hide" lay-filter="addLeaveForm" lay-submit class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">保存</button>
+                                <button type="button" id="startApprove" style="display: none" href="javascript:void(0)" lay-filter="addLeaveForm" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">发起审批</button>
+                            </div>
+                        </div>
+                            <input type="hidden" id="applyLeaveId" name="id"  class="layui-input" th:value="${applyLeave.id}" >
+                            <input type="hidden" class="layui-check-view" th:value="${type}" >
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">申请人</label>
+                                <div class="layui-input-block">
+                                    <input type="hidden" name="applyUser"  class="layui-input" th:value="${user.id}">
+                                    <input type="text"  lay-verify="required" class="layui-input" th:value="${user.username}" readonly>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">所属机构</label>
+                                <div class="layui-input-block">
+                                    <input type="hidden" name="userOrgan"  class="layui-input" th:value="${user.organId}">
+                                    <input type="text"  lay-verify="required" class="layui-input" th:value="${user.organName}" readonly>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">请假类型</label>
+                                <div class="layui-input-block">
+                                    <select id="leaveType" lay-check-view="detail|disabled" name="leaveType">
+                                        <option th:each="data:${leaveDict}" th:value="${data.dictCode}" th:text="${data.dictName}" ></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">审批状态</label>
+                                <div class="layui-input-block">
+                                    <select id="approveStatus" name="approveStatus" disabled="disabled">
+                                        <option th:each="data:${approveDict}" th:value="${data.dictCode}" th:text="${data.dictName}" ></option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">申请原因</label>
+                                <div class="layui-input-block">
+                                    <textarea type="text"  lay-check-view="detail|disabled" style="height: 200px" id="applyReason" name="applyReason"  lay-verify="required" lay-reqtext="申请原因不能为空" placeholder="请输入"  class="layui-input" th:value="${applyLeave.applyReason}" th:text="${applyLeave.applyReason}"></textarea>
+                                </div>
+                            </div>
+                        </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script th:inline="javascript" type="text/javascript">
+    layui.use(['page','form','approve','layer','controlView'], function(){
+        var $ = layui.jquery;
+        var form = layui.form;
+        var page = layui.page;
+        var layer = layui.layer;
+        var controlView = layui.controlView;
+        var approve = layui.approve;
+        var data = {
+            'approveStatus':[[${applyLeave.approveStatus}]],
+            'leaveType':[[${applyLeave.leaveType}]]
+        };
+        var addData = {
+            'approveStatus':'approveW'
+        };
+        if([[${type}]]!=='add'){
+            controlView.loadView('leaveLayout',['button','select','textarea']);
+            controlView.setData(data);
+        }
+        controlView.setDataByType('leaveLayout','add',addData);
+        if([[${applyLeave.approveStatus}]]==="approveW"){
+            //未审核状态
+            $("#startApprove").removeAttr("style");
+        }
+        form.render('select','leave');
+        //提交表单
+        form.on('submit(addLeaveForm)', function(data){
+            var index = layer.load(1);
+            $.post("/applyLeave/addOrUpdateApplyLeave",data.field,function(res){
+                layer.msg(res.message);
+                layer.close(index);     //关闭加载动画
+                if(res.code==="success"){
+                    var dom = $("#applyLeaveId");
+                    if(dom.val().length===0){
+                        dom.val(res.data);
+                    }
+                    $("#startApprove").removeAttr("style")
+                }
+            });
+            return false;
+        });
+
+        $('#startApprove').click(function () {
+            var tableId = $("#applyLeaveId").val();
+            //发起流程
+            var data = {
+                "key": 'leave',
+                "tableId": tableId,
+                "reason": $('#applyReason').val(),
+                "url": 'applyLeave/addLeave'
+            };
+            $.ajax({
+                type: "POST",
+                url: "/actProcess/startProcess",
+                contentType:"application/json;charset=UTF-8",
+                data: JSON.stringify(data),
+                dataType:"json",
+                success: function (res) {
+                    layer.msg(res.message);
+                    if(res.code==='success'){
+                        //判断流程是否发起并更改为审核中
+                        $.post("/applyLeave/checkProcess",{"id":tableId,"type":"approveS"},function(resData){
+                            if(resData.message!==undefined){
+                                layer.msg(resData.message);
+                            }
+                            if(resData.code==='success'){
+                                approve.chooseLeader(res.data.taskId,res.data.level,$('#applyReason').val(),$('#save'),function close() {
+                                    layer.msg('审批流程启动成功', {
+                                        time:false,
+                                        btn: ['我知道了'],
+                                        yes: function () {
+                                            page.backParent($('#save'),true);
+                                        }
+                                    });
+                                });
+                            }
+                        });
+                    }
+                }
+            });
+        });
+    });
+</script>

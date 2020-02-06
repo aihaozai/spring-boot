@@ -1,0 +1,126 @@
+<div class="layadmin-tabsbody-item layui-show" lay-page-jump="parentJump" id="messageTab">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card layui-card-body" style="height: 100%;overflow: auto">
+                <div class="layui-layout">
+                        <div class="layui-tab layui-tab-brief" lay-filter="messageTab">
+                            <ul class="layui-tab-title">
+                                <li class="layui-this">私信<span class="layui-badge">1</span></li>
+                                <li id="needTask">待办任务</li>
+                                <li>已办任务</li>
+                            </ul>
+                            <div class="layui-tab-content">
+                                <div class="layui-tab-item layui-show">内容1</div>
+                                <div class="layui-tab-item ">
+                                    <div class="layui-table-box">
+                                        <table id="needTaskTable" class="layui-table" style="display: none"  lay-filter="needTaskTable"></table>
+                                    </div>
+                                </div>
+                                <div class="layui-tab-item ">
+                                    <div class="layui-table-box">
+                                        <table id="completeTaskTable" class="layui-table" style="display: none"  lay-filter="needTaskTable"></table>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script type="text/html" id="needTaskBar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+    <a class="layui-btn layui-btn-xs" lay-event="approve">审批</a>
+</script>
+<script type="text/html" id="completeTaskBar">
+    <a class="layui-btn layui-btn-primary layui-btn-xs" lay-event="detail">查看</a>
+</script>
+<script data-th-inline="none" type="text/javascript">
+    /*使用模块加载的方式 加载文件*/
+    layui.config({
+        base: './layui/'
+    }).use(['layer','table','form','element','system','page'], function () {
+        var $ = layui.jquery;
+        var table = layui.table;
+        var system = layui.system;
+        var layer = layui.layer;
+        var element = layui.element;
+        var page = layui.page;
+        $.post("/message/getMessageNum",function(res){
+            if(res.code==='success') {
+                if(res.data.needTask===0){
+                    system.clearDot();
+                }else {
+                    $('#needTask').append('<span class="layui-badge">'+res.data.needTask+'</span>');
+                }
+            }
+        });
+        //一些事件监听
+        element.on('tab(messageTab)', function(data){
+            // this 当前Tab标题所在的原始DOM元素
+            // data.index得到当前Tab的所在下标
+            // data.elem得到当前的Tab大容器
+            if(data.index===1){
+                changeTask('needTaskTable','needTaskBar','N');
+            }else if(data.index===2){
+                changeTask('completeTaskTable','completeTaskBar','Y');
+            }
+        });
+        // changeNeedTask('needTaskTable','needTaskBar','N');
+        // changeNeedTask('completeTaskTable','completeTaskBar','Y');
+        function changeTask(elem,bar,status) {
+            layer.load(2);
+            var renderTable = function () {
+                table.render({
+                    elem: '#'+elem
+                    , url: '/message/getTaskPage'
+                    , cols: [[
+                        {field: 'task_name', title: '任务名称'},
+                        {field: 'launch_name', title: '发起人'},
+                        {field: 'assignee_name', title: '审批人'},
+                        {field: 'start_time', title: '开始时间'},
+                        {field: 'end_time', title: '结束时间',templet: complain},
+                        {fixed: 'right', title: '操作', width: 165, align:'center', toolbar: '#'+bar}
+                    ]]
+                    , page: true
+                    , limit: 10   //默认十条数据一页
+                    , limits: [10, 20, 30, 50]  //数据分页条
+                    , where: {'data':{'orderBy':'start_time desc','status':status}}
+                    , done: function (res, curr, count) {
+                        layer.closeAll('loading');
+                        layer.msg(res.msg);
+                    }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                        return {
+                            "code": res.code, //解析接口状态
+                            "msg": res.message, //解析提示文本
+                            "count": res.count, //解析数据长度
+                            "data": res.data //解析数据列表
+                        };
+                    }
+                });
+            };
+            renderTable();
+            function complain(d){//操作中显示的内容
+                if(d.end_time===undefined){
+                    return '未审批';
+                }
+                return d.end_time;
+            }
+        }
+        //监听工具条
+        table.on('tool(needTaskTable)', function (obj) {
+           tool(obj);
+        });
+        //监听工具条
+        table.on('tool(completeTaskTable)', function (obj) {
+            tool(obj);
+        });
+        function tool(obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if(layEvent!==""){
+                page.loadPage($('#messageTab'),'message/taskMng',{'id':data.table_id,'taskId':data.id,'proId':data.process_id,'url':data.url,'type':'detail','taskType':layEvent});
+            }
+        }
+    });
+</script>

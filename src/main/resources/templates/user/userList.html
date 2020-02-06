@@ -1,12 +1,11 @@
-<div class=" layui-show">
+<div class="layadmin-tabsbody-item layui-show">
     <div class="layui-fluid">
         <div class="layui-row layui-col-space15">
-            <div class="layui-card">
-                <div class="layui-card-body">
-                    <div class="layui-layout">
+            <div class="layui-card layui-card-body">
+                <div class="layui-layout">
                         <div class="div-head">
-                            <div class="div-inline div-center" style="left: 4%"><p class="div-inline">用户管理</p></div>
-                            <div class="div-inline div-center" style="left: 97%">
+                            <div class="div-inline head-title"><p><span class="p_span">用户管理</span></p><span class="p_area"></span></div>
+                            <div class="div-inline div-center" style="right: 0">
                                 <button id="addUser" type="button" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">添加</button>
                             </div>
                         </div>
@@ -14,7 +13,6 @@
                             <table id="userTable" class="layui-table" style="display: none"  lay-filter="userTable"></table>
                         </div>
                     </div>
-                </div>
             </div>
         </div>
     </div>
@@ -31,6 +29,7 @@
         var renderTable = function () {
             table.render({
                 elem: '#userTable'
+                ,toolbar: true
                 , url: '/user/getUserPage'
                 , cols: [[
                     {field: 'username', title: '用户名'},
@@ -41,7 +40,7 @@
                 , page: true
                 , limit: 10   //默认十条数据一页
                 , limits: [10, 20, 30, 50]  //数据分页条
-                , where: {'asc':'createTime'}
+                , where: {'data':{'asc':'createTime'}}
                 , done: function (res, curr, count) {
                     layer.closeAll('loading');
                     form.render('checkbox');
@@ -103,7 +102,7 @@
                 type: 2,
                 title: param===null?"添加用户":"编辑用户", //标题栏
                 closeBtn: 2,    //右上角关闭按钮样式,0不显示
-                area: ["555px", "355px"],
+                area: ["555px", "420px"],
                 shade: 0.2, //阴影
                 id: id, //设定一个id，防止重复弹出
                 btn: ['提交', '取消'],
@@ -116,7 +115,7 @@
                 },
                 yes: function (index, layero) { //提交按钮
                     let body = layer.getChildFrame('body', index);
-                    var submit = body.find('a')[1];
+                    var submit = body.find('button')[0];
                     // 触发点击事件，会对表单进行验证，验证成功则提交表单，失败则返回错误信息
                     submit.click();
                     flag = true;

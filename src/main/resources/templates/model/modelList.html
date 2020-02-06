@@ -1,0 +1,133 @@
+<div class="layadmin-tabsbody-item layui-show">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card layui-card-body">
+                <div class="layui-layout">
+                        <div class="div-head">
+                            <div class="div-inline head-title"><p><span class="p_span">模型管理</span></p><span class="p_area"></span></div>
+                            <div class="div-inline div-center" style="right: 0">
+                                <button id="importModel" type="button" href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">导入模型</button>
+                            </div>
+                        </div>
+                        <div class="layui-table-box" style="overflow:auto;height:89%;">
+                            <table id="modelTable" class="layui-table" style="display: none" lay-filter="modelTable"></table>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-inline="none" type="text/javascript">
+    layui.config({
+        base: './layui/'
+    }).use(['table','layer','form','element'], function(){
+        var table = layui.table;
+        var layer = layui.layer;
+        var form = layui.form;
+        var element = layui.element;
+        layer.load(2);
+        // 渲染表格
+        var renderTable = function () {
+            table.render({
+                elem: '#modelTable'
+                , url: '/model/getModelsPage'
+                , cols: [[
+                    {field: 'name', title: '模型名称'}
+                    ,{field: 'version',  title: '版本'}
+                    , {field: 'createTime', title: '创建时间'}
+                    , {templet: operate, title: '操作'}
+                ]]
+                , page: true
+                , limit: 10   //默认十条数据一页
+                , limits: [10, 20, 30, 50]  //数据分页条
+                , done: function (res, curr, count) {
+                    layer.closeAll('loading');
+                    layer.msg(res.msg);
+                    form.render('checkbox');
+                    element.render('progress');
+                }, parseData: function (res) { //将原始数据解析成 table 组件所规定的数据
+                    return {
+                        "code": res.code, //解析接口状态
+                        "msg": res.message, //解析提示文本
+                        "count": res.count, //解析数据长度
+                        "data": res.data //解析数据列表
+                    };
+                }
+            });
+        };
+        renderTable();
+
+        $('#importModel').click(function () {
+            importModel('impModel',null)
+        });
+        //添加
+        function importModel(id,param) {
+            var flag = false;
+            layer.open({
+                type: 2,
+                title: param===null?"导入模型":"编辑模型", //标题栏
+                closeBtn: 2,    //右上角关闭按钮样式,0不显示
+                area: ["555px", "575px"],
+                shade: 0.2, //阴影
+                id: id, //设定一个id，防止重复弹出
+                btn: ['提交', '取消'],
+                btnAlign: 'r',
+                moveType: 1, //拖拽模式，0或者1
+                content: '/model/modelView?id='+param,
+                success: function (layero, index) {    //成功获得加载html时，预先加载，将值从父窗口传到 子窗口
+                    var body = layer.getChildFrame('body', index);  //弹出窗口body
+                    //赋值数据
+                },
+                yes: function (index, layero) { //提交按钮
+                    let body = layer.getChildFrame('body', index);
+                    var submit = body.find('button')[0];
+                    // 触发点击事件，会对表单进行验证，验证成功则提交表单，失败则返回错误信息
+                    submit.click();
+                    flag = true;
+                },
+                btn2: function (index, layero) {
+                },
+                end: function () {
+                    if (flag){
+                        renderTable();//提交成功关闭后刷新table
+                    }
+                }
+            });
+        }
+
+        function operate(d) {
+            return  '<span>&nbsp;&nbsp;&nbsp;&nbsp;</span>' +
+                '<button type="button" style="font-size:13px" lay-event="publish" class="layui-btn layui-btn-xs layui-btn-normal layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>发布<span>&nbsp;&nbsp;&nbsp;</span></button>' +
+                '<button type="button" style="font-size:13px" lay-event="del" class="layui-btn layui-btn-xs layui-btn-danger layui-btn-radius"><span>&nbsp;&nbsp;&nbsp;</span>删除<span>&nbsp;&nbsp;&nbsp;</span></button>';
+        }
+
+        //监听工具条
+        table.on('tool(modelTable)', function (obj) {
+            var data = obj.data;
+            var layEvent = obj.event;
+            if(layEvent==='publish'){
+                layer.msg('正在发布<br><span style="color: orangered">[</span>'+data.name+'<span style="color: orangered">]</span>', {
+                    time:false,
+                    btn: ['发布', '取消'],
+                    yes: function () {
+                        $.post('/model/deployment',{"id":data.id},function (data) {
+                            layer.msg(data.message);
+                        });
+                    }
+                });
+            }else if(layEvent==='del'){
+                layer.msg('正在删除<br><span style="color: orangered">[</span>'+data.name+'<span style="color: orangered">]</span>', {
+                    time:false,
+                    btn: ['删除', '取消'],
+                    yes: function () {
+                        $.post('/model/delModel',{"id":data.id},function (data) {
+                            layer.msg(data.message);
+                            if(data.code==='success')renderTable();
+                        });
+                    }
+                });
+            }
+        });
+
+    });
+</script>

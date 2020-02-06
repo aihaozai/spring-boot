@@ -41,8 +41,8 @@ public class TransformUtil {
     protected TransformUtil(){
 
     }
-    public static List<Object> CollectionToList(Collection<String> coll){
-        List<Object> list ;
+    public static List<String> CollectionToList(Collection<String> coll){
+        List<String> list ;
         if (coll instanceof List)list = (List)coll;
         else list = new ArrayList(coll);
         return list;

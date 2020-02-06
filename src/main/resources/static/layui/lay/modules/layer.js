@@ -205,6 +205,7 @@ Class.pt.config = {
   offset: 'auto',
   area: 'auto',
   closeBtn: 1,
+  blackBtn: 0, //我的自定义关闭按钮 1开启
   time: 0, //0表示不自动关闭
   zIndex: 19891014, 
   maxWidth: 360,
@@ -225,7 +226,6 @@ Class.pt.vessel = function(conType, callback){
   var titleHTML = (config.title ? '<div class="layui-layer-title" style="'+ (titype ? config.title[1] : '') +'">' 
     + (titype ? config.title[0] : config.title) 
   + '</div>' : '');
-  
   config.zIndex = zIndex;
   callback([
     //遮罩
@@ -251,6 +251,7 @@ Class.pt.vessel = function(conType, callback){
         }
         return '<div class="'+ doms[6] +' layui-layer-btn-'+ (config.btnAlign||'') +'">'+ button +'</div>'
       }() : '')
+      + (config.blackBtn ===1 ? '<i class="layui-icon layui-layer-close" close="">ဆ</i>' : '')
       + (config.resize ? '<span class="layui-layer-resize"></span>' : '')
     + '</div>'
   ], titleHTML, $('<div class="layui-layer-move"></div>'));

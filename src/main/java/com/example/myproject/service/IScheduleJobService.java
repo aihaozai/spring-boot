@@ -1,11 +1,10 @@
 package com.example.myproject.service;
 
 import com.example.myproject.common.Scheduled.ScheduleJob;
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.SystemResponse;
 import org.quartz.SchedulerException;
 
-import java.util.List;
 import java.util.Map;
 
 /**

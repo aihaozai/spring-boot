@@ -1,6 +1,6 @@
 package com.example.myproject.service;
 
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.User;
 import com.example.myproject.entity.UserRole;
 import java.util.List;

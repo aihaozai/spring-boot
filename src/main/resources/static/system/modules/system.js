@@ -6,7 +6,6 @@ layui.extend({
     var view = layui.view;
     var element = layui.element;
     var $ = layui.jquery;
-    //layui.extend(conf.extend);
     var self = {};
     conf.viewTabs = true;
     self.appBody = null;
@@ -14,6 +13,8 @@ layui.extend({
     self.routeLeaveFunc = null;
     self.shrinkCls = 'sidebar-shrink';
     self.openFlag = false;
+    self.resizeFlag = false;
+    self.tabUrl = null;
     self.routeLeave = function (callback) {
         this.routeLeaveFunc = callback
     };
@@ -28,6 +29,8 @@ layui.extend({
 
     //初始化视图区域
     self.initView = function (route) {
+        console.log(route)
+        console.log(JSON.stringify(route));
         if (!self.route.href || self.route.href === '/') {
             self.route = layui.router('#' + conf.entry);
             route = self.route
@@ -49,9 +52,9 @@ layui.extend({
                     //加载视图文件
                     loadRenderPage();
                     //监听main-body宽度变化
-                    $("#main-body").resize(function(){
-                        $(window).resize();
-                    });
+                    // $("#main-body").resize(function(){
+                    //
+                    // });
                 })
             } else {
                 //layout文件已加载，加载视图文件
@@ -65,6 +68,8 @@ layui.extend({
         window.location.hash = url
     };
     self.flexible = function (open) {
+        //增强版table子表关闭
+        $("[lay-url='"+self.tabUrl+"']").find('.childTable.layui-icon.layui-icon-down').trigger("click");
         self.openFlag = open;
         if (open === true) {
              view.container.removeClass(self.shrinkCls);
@@ -73,6 +78,11 @@ layui.extend({
              view.container.addClass(self.shrinkCls);
              view.container.removeClass('sidebar-menu');
         }
+        var timer = function bodyresize(){
+            $(window).resize();
+        };
+        setTimeout(timer,400);
+        clearTimeout(timer);
     };
     $(window).on('hashchange',function () {
         self.route = layui.router();
@@ -90,7 +100,7 @@ layui.extend({
         if(!self.openFlag)self.flexible(true);
         return false;
     });
-    $(document).on('click','.layui-tab-title li',function (e) {
+    $(document).on('click','#lay-tab .layui-tab-title li',function (e) {
         var url = $(this).attr('lay-url');
         if (url==='') return;
         self.showTab(url);
@@ -118,6 +128,56 @@ layui.extend({
     self.on('flexible', function (init) {
         var status = view.container.hasClass(self.shrinkCls);
         self.flexible(status);
+    });
+
+    //刷新事件
+    self.on('refresh', function (init) {
+        if($('#'+conf.containerBody).hasClass('container-parent-hide')){
+            $('#'+conf.containerBody).removeClass('container-parent-hide');
+        }
+        $('#'+conf.pageBody).empty();
+        self.closeTab(self.tabUrl);
+        self.route.path=self.tabUrl;
+        self.route.href=self.tabUrl;
+        self.route.fileurl=self.tabUrl;
+        self.initView(self.route);
+    });
+    //全屏事件
+    self.on('fullscreen', function (init) {
+        if (!document.fullscreenElement && // alternative standard method
+            !document.mozFullScreenElement && !document.webkitFullscreenElement) {// current working methods
+            if (document.documentElement.requestFullscreen) {
+                document.documentElement.requestFullscreen();
+            } else if (document.documentElement.mozRequestFullScreen) {
+                document.documentElement.mozRequestFullScreen();
+            } else if (document.documentElement.webkitRequestFullscreen) {
+                document.documentElement.webkitRequestFullscreen(Element.ALLOW_KEYBOARD_INPUT);
+            }
+        } else {
+            if (document.cancelFullScreen) {
+                document.cancelFullScreen();
+            } else if (document.mozCancelFullScreen) {
+                document.mozCancelFullScreen();
+            } else if (document.webkitCancelFullScreen) {
+                document.webkitCancelFullScreen();
+            }
+        }
+    });
+
+    //消息事件
+    self.on('message', function (init) {
+        layui.each($('#LAY-system-side-menu').find('a'),function(index,item) {
+            if($(this).attr('lay-href')===init.attr('lay-head-href')){
+                $(this).closest('dd').addClass('layui-this');
+                $(this).closest('li').addClass('layui-nav-itemed');
+                self.tabUrl=$(this).attr('lay-href');
+                self.renderTabTitle($(this).text().trim(),$(this).attr('lay-href'));
+            }
+            else {
+                $(this).closest('dd').removeClass('layui-this');
+                $(this).closest('li').removeClass('layui-nav-itemed').removeClass('layui-this');
+            }
+        });
     });
     //渲染tab
     self.renderTabTitle = function(name,url){
@@ -148,18 +208,32 @@ layui.extend({
     };
     //显示tab
     self.showTab = function(url) {
+        $('#' + conf.containerBody).removeClass('container-parent-hide');
+        layui.each( $('#' + conf.pageBody).children(),function(index,item){
+            if($(this).attr('lay-parent-url')===self.tabUrl){
+                $(this).remove();
+            }
+        });
+        self.tabUrl=url;
         $("#" + conf.containerBody).children().each(function () {
             if($(this).attr("lay-url")===url)$(this).css("display","block");
             else $(this).css("display","none");
-            $(window).resize();
         });
     };
     //关闭tab
     self.closeTab = function(url) {
         $("#" + conf.containerBody).children().each(function () {
             if($(this).attr("lay-url")===url)$(this).remove();
-            $(window).resize();
         });
+    };
+
+    self.dot = function(){
+        if($('#dot span').length===0){
+            $('#dot').append('<span class="layui-badge-dot"></span>');
+        }
+    };
+    self.clearDot = function(){
+        $('#dot span').remove();
     };
     exports('system', self)
 });

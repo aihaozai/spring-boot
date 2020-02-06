@@ -1,7 +1,7 @@
 package com.example.myproject.service.impl;
 
-import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.common.baseDao.AllDao;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.common.utils.UUIDUtil;
 import com.example.myproject.entity.*;
 import com.example.myproject.entity.view.PersonMenuView;
@@ -25,9 +25,11 @@ public class RoleServiceImpl implements IRoleService {
     @Autowired
     private AllDao.UserRoleDao userRoleDao;
     @Autowired
-    private AllDao.PersonRoleDao personRoleDao;
+    private AllDao.MenuRoleDao menuRoleDao;
     @Autowired
     private AllDao.PersonMenuViewDao personMenuViewDao;
+    @Autowired
+    private AllDao.PermissionRoleDao permissionRoleDao;
     @Override
     public Map findListByPage(Page page) {
         return roleDao.findListByPage(page);
@@ -35,12 +37,12 @@ public class RoleServiceImpl implements IRoleService {
 
     @Override
     public List<String> getRoleMenu(String tField, String field, Object object) {
-        return personMenuViewDao.findListByFiledForOne(tField,field,object);
+        return personMenuViewDao.findListByFiled(tField,field,object);
     }
 
     @Override
     public List<String> getRoleUser(String tField, String field, Object object) {
-        return userRoleDao.findListByFiledForOne(tField,field,object);
+        return userRoleDao.findListByFiled(tField,field,object);
     }
 
     @Override
@@ -58,7 +60,7 @@ public class RoleServiceImpl implements IRoleService {
     @Transactional
     public String authorizeMenu(String id, String roleName, String array) {
         List<String> newList = new ArrayList<>(Arrays.asList(array.split(",")));
-        List<String> oldList = personRoleDao.findListByFiledForOne("roleMenu","roleId",id);
+        List<String> oldList = menuRoleDao.findListByFiled("roleMenu","roleId",id);
         List<String> existList = new ArrayList<>();
         for(String oldId:oldList){
             for(String newId:newList){
@@ -70,15 +72,15 @@ public class RoleServiceImpl implements IRoleService {
         oldList.removeAll(existList);   //删除的
         newList.removeAll(existList);   //添加的
         for (String roleMenu:newList){
-            PersonRole personRole = new PersonRole();
+            MenuRole personRole = new MenuRole();
             personRole.setRoleId(id);
             personRole.setRoleName(roleName);
             personRole.setId(UUIDUtil.randomUUID());
             personRole.setRoleMenu(roleMenu);
-            personRoleDao.save(personRole);
+            menuRoleDao.save(personRole);
         }
         for (String roleMenu:oldList){
-            personRoleDao.deleteByFiled("roleId",id,"roleMenu",roleMenu);
+            menuRoleDao.deleteByFiled("roleId",id,"roleMenu",roleMenu);
         }
         return "菜单授权成功";
     }
@@ -87,7 +89,7 @@ public class RoleServiceImpl implements IRoleService {
     @Transactional
     public String authorizeUser(String personRole, String userRoleArray) {
         List<String> newList = new ArrayList<>(Arrays.asList(userRoleArray.split(",")));
-        List<String> oldList = userRoleDao.findListByFiledForOne("userRole","personRole",personRole);
+        List<String> oldList = userRoleDao.findListByFiled("userRole","personRole",personRole);
         List<String> existList = new ArrayList<>();
         for(String oldId:oldList){
             for(String newId:newList){
@@ -115,13 +117,18 @@ public class RoleServiceImpl implements IRoleService {
     @Transactional
     public void delRole(String id) {
         roleDao.deleteByFiled("id",id);
-        personRoleDao.deleteByFiled("roleId",id);
+        menuRoleDao.deleteByFiled("roleId",id);
         userRoleDao.deleteByFiled("personRole",id);
     }
 
     @Override
-    public List<PersonMenuView> findListByFiledIn(String roleId, List<Object> collectionToList, HashMap hashMap) {
+    public List<PersonMenuView> findListByFiledIn(String roleId, List<String> collectionToList, HashMap hashMap) {
         return personMenuViewDao.findListByFiledIn(roleId,collectionToList,hashMap);
+    }
+
+    @Override
+    public List<String> getPermissionRole(String menuId, String roleId) {
+        return permissionRoleDao.findListByJSONObject(menuId,roleId);
     }
 
 }

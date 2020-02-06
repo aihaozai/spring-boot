@@ -29,6 +29,9 @@ public class User implements Serializable {
 
     private String username;
 
+    @Column(name = "organ_id")
+    private String organId;
+
     @Column(name = "status_lock")
     private Integer statusLock;
 

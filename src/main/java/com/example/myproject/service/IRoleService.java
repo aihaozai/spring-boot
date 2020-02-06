@@ -1,8 +1,7 @@
 package com.example.myproject.service;
 
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.Person;
-import com.example.myproject.entity.User;
 import com.example.myproject.entity.view.PersonMenuView;
 
 import java.util.HashMap;
@@ -29,5 +28,7 @@ public interface IRoleService {
 
     void delRole(String id);
 
-    List<PersonMenuView> findListByFiledIn(String roleId, List<Object> collectionToList, HashMap hashMap);
+    List<PersonMenuView> findListByFiledIn(String roleId, List<String> collectionToList, HashMap hashMap);
+
+    List<String> getPermissionRole(String menuId, String roleId);
 }

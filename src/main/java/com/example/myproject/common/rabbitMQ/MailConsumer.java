@@ -3,7 +3,7 @@ package com.example.myproject.common.rabbitMQ;
 import com.example.myproject.common.rabbitMQ.config.MailRabbitConfig;
 import com.example.myproject.common.utils.MailUtil;
 import com.example.myproject.common.utils.MessageUtil;
-import com.example.myproject.entity.Mail;
+import com.example.myproject.common.pojo.Mail;
 import com.rabbitmq.client.Channel;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.core.Message;

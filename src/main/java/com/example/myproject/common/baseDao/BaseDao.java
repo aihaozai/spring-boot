@@ -1,11 +1,10 @@
 package com.example.myproject.common.baseDao;
 
 import com.alibaba.fastjson.JSONObject;
-import com.example.myproject.entity.Page;
+import com.example.myproject.common.pojo.Page;
 import org.apache.commons.lang3.StringUtils;
 import org.hibernate.SQLQuery;
 import org.hibernate.query.internal.NativeQueryImpl;
-import org.hibernate.query.spi.NativeQueryImplementor;
 import org.hibernate.transform.Transformers;
 import org.springframework.cglib.beans.BeanMap;
 import javax.persistence.*;
@@ -82,6 +81,18 @@ public class BaseDao<T,ID extends Serializable> {
     }
     /**
      *@author Jen
+     *@Point 更新多个字段
+     *@Param  file 字段名 object值 filed根据字段 object值
+     *@return Bean
+     */
+    public Integer updateById(String id,HashMap<String,Object> map){
+        String primary = getEntityPrimary(entityClass);
+        String sql = getSetSql(map);
+        String hsql = MessageFormat.format("update {0} {1} where {2} = ''{3}'' ", entityClass.getSimpleName(),sql,primary,id);
+        return this.entityManager.createQuery(hsql).executeUpdate();
+    }
+    /**
+     *@author Jen
      *@Point 更新一个字段
      *@Param  file 字段名 object值 filed根据字段 object值
      *@return Bean
@@ -96,19 +107,22 @@ public class BaseDao<T,ID extends Serializable> {
      *@Param  file 字段名 object值
      *@return Bean
      */
-    public Integer updateById(String id,String filed,Object object) throws Exception{
+    public Integer updateById(String id,String field,Object object) throws Exception{
         String primary = getEntityPrimary(entityClass);
         if(StringUtils.isNotEmpty(primary)){
-            String hsql = MessageFormat.format("update {0} set {1} = ''{2}'' where {3} = ''{4}'' ", entityClass.getSimpleName(),filed,object,primary,id);
+            String hsql = MessageFormat.format("update {0} set {1} = ''{2}'' where {3} = ''{4}'' ", entityClass.getSimpleName(),field,object,primary,id);
             return this.entityManager.createQuery(hsql).executeUpdate();
         }else throw new Exception("没有找到实体类主键");
     }
 
-    public List<T> findAll(String qlString){
-        Query query = this.entityManager.createQuery(qlString);
+    public List<T> findAll(String hsql){
+        Query query = this.entityManager.createQuery(hsql);
         return query.getResultList();
     }
-
+    public Object findByHSQL(String hsql){
+        Query query = this.entityManager.createQuery(hsql);
+        return query.getSingleResult();
+    }
     public List<T> findAll() {
         return this.entityManager.createQuery("FROM "+entityClass.getSimpleName()).getResultList();
     }
@@ -137,6 +151,20 @@ public class BaseDao<T,ID extends Serializable> {
         entityManager.close();
         return bean;
     }
+
+    /**
+     *@author Jen
+     *@Point 根据一个字段查询数量
+     *@Param file 字段名 object查询参数
+     *@return Bean
+     */
+    public Integer findCountByFiled(String filed, Object o){
+        String sql = MessageFormat.format("SELECT COUNT(*) FROM {0} where {1} = ''{2}''", entityClass.getSimpleName(), filed, o);
+        Query queryCount = createHSQL(sql);
+        Object num = queryCount.getSingleResult();
+        return Integer.parseInt(num.toString());
+    }
+
     /**
      *@author Jen
      *@Point 根据一个字段查询HSQL
@@ -163,6 +191,17 @@ public class BaseDao<T,ID extends Serializable> {
 
     /**
      *@author Jen
+     *@Point HSQL查询
+     *@return List
+     */
+    public List<T> findListByHSQL(String hsql){
+        List<T> list = createHSQLToList(hsql);
+        entityManager.close();
+        return list;
+    }
+
+    /**
+     *@author Jen
      *@Point 分页查询
      *@Param Page
      *@return List
@@ -170,22 +209,23 @@ public class BaseDao<T,ID extends Serializable> {
     public Map findListByPage(Page page){
         final String[] sql = {MessageFormat.format("FROM {0} ", entityClass.getSimpleName())};
         JSONObject jsonObject = page.getData();
-        HashMap hashMap = new HashMap();
+        HashMap<String,Object> hashMap = new HashMap<>();
+        StringBuilder countSql = new StringBuilder();
         if(jsonObject!=null) {
             for (Map.Entry<String, Object> entry : jsonObject.entrySet()) {
                 if(entry.getKey().equals("desc")||entry.getKey().equals("asc")){
                     hashMap.put(entry.getKey(),entry.getValue());
                 }else if(sql[0].contains("where")){
                         sql[0] += " and " + entry.getKey() + "= '" + entry.getValue() + "'";
+                        countSql.append(" and ").append(entry.getKey()).append("= '").append(entry.getValue()).append("'");
                 }else {
                         sql[0] += " where " + entry.getKey() + "= '" + entry.getValue() + "'";
+                        countSql.append(" where ").append(entry.getKey()).append("= '").append(entry.getValue()).append("'");
                     }
                 }
-            hashMap.forEach((k,v) -> {
-                sql[0] += " order by "+v+" "+k;
-            });
+            hashMap.forEach((k,v) -> sql[0] += " order by "+v+" "+k);
         }
-        Query queryCount = createHSQL("SELECT COUNT(*) FROM "+entityClass.getSimpleName());
+        Query queryCount = createHSQL("SELECT COUNT(*) FROM "+entityClass.getSimpleName()+countSql);
         Object num = queryCount.getSingleResult();
         Query query = createHSQL(sql[0]);
         if(page.getLimit()!=null&page.getPage()!=null) {
@@ -194,11 +234,12 @@ public class BaseDao<T,ID extends Serializable> {
         }
         List<T> list = getHSQLList(query);
         entityManager.close();
-        Map map = new HashMap();
+        Map<String,Object> map = new HashMap<>();
         map.put("count",num);
         map.put("data",list);
         return map;
     }
+
 
     /**
      *@author Jen
@@ -219,9 +260,9 @@ public class BaseDao<T,ID extends Serializable> {
      *@Param file 字段名 object查询参数
      *@return List
      */
-    public List<String> findListByFiledForOne(String tField,String field, Object o){
+    public List<String> findListByFiled(String tField,String field, Object o){
         String sql = MessageFormat.format("select {0} FROM {1} where {2} = ''{3}''", tField,entityClass.getSimpleName(), field, o);
-        List<String> list = createHSQLListByOne(sql);
+        List<String> list = createHSQLToList(sql);
         entityManager.close();
         return list;
     }
@@ -232,21 +273,9 @@ public class BaseDao<T,ID extends Serializable> {
      *@Param file 字段名 object查询参数
      *@return List
      */
-    public List<T> findListFiledForOneDistinct(String tFiled){
+    public List<String> findListFiledForDistinct(String tFiled){
         String sql = MessageFormat.format("select distinct {0} FROM {1}", tFiled,entityClass.getSimpleName());
-        List<T> list = createHSQLList(sql);
-        entityManager.close();
-        return list;
-    }
-    /**
-     *@author Jen
-     *@Point 查询一个字段List
-     *@Param file 字段名 object查询参数
-     *@return List
-     */
-    public List<T> findListFiledForOne(String tFiled){
-        String sql = MessageFormat.format("select {0} FROM {1}", tFiled,entityClass.getSimpleName());
-        List<T> list = createHSQLList(sql);
+        List<String> list = (List<String>)createHSQLList(sql);
         entityManager.close();
         return list;
     }
@@ -256,12 +285,11 @@ public class BaseDao<T,ID extends Serializable> {
      *@Param file 字段名 object查询参数
      *@return List
      */
-    public List<T> findListByFiledIn(String filed, List<Object> list,HashMap hashMap){
-        final String[] sql = {"FROM "+entityClass.getSimpleName()+" WHERE "+ filed +" IN (:list)"};
+    public List<T> findListByFiledIn(String filed, List<String> list,HashMap<String,Object> hashMap){
+        final String[] sql = {"from "+entityClass.getSimpleName()+" where "+ filed +" in (:list)"};
         sql[0] = getSql(sql[0],hashMap);
         Query query = createHSQL(sql[0]);
         query.setParameter("list",list);
-        if(list.size()==0)  query = createHSQL("FROM "+entityClass.getSimpleName());
         entityManager.close();
         return (List<T>)query.getResultList();
     }
@@ -277,6 +305,14 @@ public class BaseDao<T,ID extends Serializable> {
         entityManager.close();
         return new Integer(num);
     }
+
+    public Integer findMaxByFiled(String tFiled,String filed,String value){
+        String sql = MessageFormat.format("select max({0}) FROM {1} where {2} = ''{3}'' ", tFiled,entityClass.getSimpleName(),filed,value);
+        String num = createHSQLMax(sql).toString();
+        entityManager.close();
+        return new Integer(num);
+    }
+
     /**
      *@Point HSQl 创建查询 查询为空 请抛出NoResultException
      *@Param HSQl
@@ -309,7 +345,7 @@ public class BaseDao<T,ID extends Serializable> {
      */
     public HashMap getMapBySQLQuery(String sql) {
         try {
-            return (HashMap)createSQLMap(sql).getSingleResult();
+            return (HashMap) createSQLMap(sql).getSingleResult();
         }catch (NoResultException e){
             return null;
         }
@@ -323,12 +359,6 @@ public class BaseDao<T,ID extends Serializable> {
     private Query createSQLMap(String SQL) {
         Query query = this.getEntityManager().createNativeQuery(SQL);
         query.unwrap(NativeQueryImpl.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
-        return query;
-    }
-
-    private Query createSQLQueryMap(String SQL) {
-        Query query = this.getEntityManager().createNativeQuery(SQL);
-        query.unwrap(SQLQuery.class).setResultTransformer(Transformers.ALIAS_TO_ENTITY_MAP);
         return query;
     }
 
@@ -379,7 +409,7 @@ public class BaseDao<T,ID extends Serializable> {
             return new ArrayList<>();
         }
     }
-    private List createHSQLListByOne(String SQL) {
+    private List createHSQLToList(String SQL) {
         try {
             return this.getEntityManager().createQuery(SQL).getResultList();
         }catch (NoResultException e){
@@ -401,7 +431,9 @@ public class BaseDao<T,ID extends Serializable> {
      */
     private Object createHSQLMax(String SQL) {
         try {
-            return this.getEntityManager().createQuery(SQL).getSingleResult();
+            Object object =  this.getEntityManager().createQuery(SQL).getSingleResult();
+           if(object==null)return -1;
+           return object;
         }catch (NoResultException e){
             return -1;
         }
@@ -412,19 +444,30 @@ public class BaseDao<T,ID extends Serializable> {
      *@Param sql hashMap
      *@return String
      */
-    private String getSql(String sql,HashMap hashMap){
+    private String getSql(String sql,HashMap<String,Object> hashMap){
         final String[] SQL = {sql};
         hashMap.forEach((k,v) -> {
             if(k.equals("desc")||k.equals("asc")){
                 SQL[0] += " order by "+v+" "+k;
-            }else if(sql.contains("where and")){
+            }else if(sql.contains("where")){
                 SQL[0] += " and "+k+" = '"+v+"'";
-            }else if(!sql.contains("where and")){
+            }else if(!sql.contains("where")){
                 SQL[0] += "where "+k+" = '"+v+"'";
             }
 
         });
         return SQL[0];
+    }
+    /**
+     *@author Jen
+     *@Point 得到updateSql
+     *@Param sql hashMap
+     *@return String
+     */
+    private String getSetSql(HashMap<String,Object> hashMap){
+        final String[] SQL = {"set "};
+        hashMap.forEach((k,v) -> SQL[0] += k+" = '"+v+"',");
+        return SQL[0].substring(0, SQL[0].length() - 1);
     }
     /**
      *@author Jen
@@ -480,17 +523,13 @@ public class BaseDao<T,ID extends Serializable> {
         HashMap<String, Object> entityMap = new HashMap<>();
         HashMap<String, Object> oldMap = new HashMap<>();
         HashMap<String, Object> fileMap = getEntityFieldsMap(clazz);
-        fileMap.forEach((k,v) -> {
-            map.forEach((k1,v1) -> {
-                if(k.equals(k1)){
-                    entityMap.put(v.toString(),v1);
-                    oldMap.put(k1,v1);
-                }
-            });
-        });
-        oldMap.forEach((k,v) -> {
-            map.remove(k);
-        });
+        fileMap.forEach((k,v) -> map.forEach((k1, v1) -> {
+            if(k.equals(k1)){
+                entityMap.put(v.toString(),v1);
+                oldMap.put(k1,v1);
+            }
+        }));
+        oldMap.forEach((k,v) -> map.remove(k));
         map.putAll(entityMap);
         beanMap.putAll(map);
         return bean;
