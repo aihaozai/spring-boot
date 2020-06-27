@@ -1,12 +1,21 @@
 package com.example.myproject.common.HandlerInterceptor;
 
+import com.example.myproject.entity.sys.view.UserLoginView;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.shiro.session.Session;
+import org.apache.shiro.session.mgt.eis.SessionDAO;
+import org.apache.shiro.subject.SimplePrincipalCollection;
+import org.apache.shiro.subject.support.DefaultSubjectContext;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
 import org.springframework.web.socket.WebSocketSession;
 import org.springframework.web.socket.handler.TextWebSocketHandler;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
 
 /**
  * @Program: myproject
@@ -16,7 +25,10 @@ import java.util.ArrayList;
  **/
 @Slf4j
 public class WebSocketHandler extends TextWebSocketHandler {
-
+    @Autowired
+    private SessionDAO sessionDAO;
+    @Autowired
+    private RedisTemplate redisTemplate;
     // 已建立连接的用户
     private static final ArrayList<WebSocketSession> users = new ArrayList<WebSocketSession>();
 
@@ -76,9 +88,24 @@ public class WebSocketHandler extends TextWebSocketHandler {
      */
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
-        String username = (String) session.getAttributes().get("WEBSOCKET_USERNAME");
-        log.info("用户 {} Connection closed. Status: {}",username, status);
         users.remove(session);
+        String userId = (String) session.getAttributes().get("WEBSOCKET_USER_ID");
+        if(redisTemplate.hasKey(userId))return;
+        String flag = (String) session.getAttributes().get("WEBSOCKET_LOGIN");
+        if(!Boolean.valueOf(flag)) {
+            Collection<Session> sessions = sessionDAO.getActiveSessions();
+            for (Session sess : sessions) {
+
+                SimplePrincipalCollection coll = (SimplePrincipalCollection) sess.getAttribute(DefaultSubjectContext.PRINCIPALS_SESSION_KEY);
+                if (coll == null) continue;
+                UserLoginView userLoginView = (UserLoginView) coll.getPrimaryPrincipal();
+                if (userId.equals(userLoginView.getId())) {
+                    sess.setTimeout(0);
+                    sess.stop();
+                    sessionDAO.delete(sess);
+                }
+            }
+        }
     }
 
     /**

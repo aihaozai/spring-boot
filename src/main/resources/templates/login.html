@@ -3,35 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Title</title>
+    <link rel="icon" href="data:;base64,=" media="all">
     <link rel="stylesheet" th:href="@{layui/css/layui.css(t=2)}" media="all">
-
+    <link rel="stylesheet" th:href="@{system/css/login.css(t=2)}" media="all">
 </head>
-<style>
-    html,body{
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-    }
-    .layui-login-form{
-        margin: 0 auto ; width: 400px;
-        position: relative;
-        top: 50%;
-        transform: translateY(-50%);
-    }
-</style>
 <body>
     <div class="layui-login-form">
         <form class="layui-form">
-        <div class="">
-            <input type="text" name="username" lay-verify="required"
-                   placeholder="用户名" autocomplete="off" class="layui-input">
+            <fieldset class="layui-elem-field layui-field-title zyl_mar_02">
+                <legend style="margin: auto;color: #908585">学习项目</legend>
+            </fieldset>
+        <div class="layui-form-item">
+            <input type="text" name="account" lay-verify="required"
+                   placeholder="用户名" autocomplete="off" class="layui-input layui-padding">
+            <i class="layui-icon layui-icon-username login_icon"></i>
         </div>
-        <div class="">
+        <div class="layui-form-item">
             <input type="password" name="password" lay-verify="required"
-                   placeholder="密码" autocomplete="off" class="layui-input">
+                   placeholder="密码" autocomplete="off" class="layui-input layui-padding">
+            <i class="layui-icon layui-icon-password login_icon"></i>
         </div>
-        <div class="">
+        <div class="layui-form-item" style="margin-top: -10px;">
+            <input type="checkbox" name="rememberMe" title="记住我"  lay-skin="primary">
+        </div>
+        <div class="layui-form-item">
             <button class="layui-btn layui-btn-normal layui-btn-fluid" lay-submit
                     lay-filter="login-submit" id="login">
                 立即登录
@@ -43,27 +38,43 @@
 <script th:src="@{layui/layui.js}"></script>
 <script th:inline="javascript">
     layui.use(['form', 'layer'], function (form,layer) {
+        //防止页面后退
+        history.pushState(null, null, document.URL);
+        window.addEventListener('popstate', function () {
+            history.pushState(null, null, document.URL);
+        });
         var $ = layui.jquery;
         //提交登录表单
         form.on('submit(login-submit)', function (data) {
             var loading = $(this).find('.layui-icon');
             if (loading.is(":visible")) return;
             loading.show();
-            $.ajax({
-                type: "POST",
-                url: "/checkLogin",
-                contentType:"application/json;charset=UTF-8",
-                data: JSON.stringify(data.field),
-                dataType:"json",
-                success: function (data) {
-                    if(data.code==='success'){
+            var login = function() {
+                $.post('/checkLogin', data.field, function (data) {
+                    if (data.code === 'success') {
                         layer.msg("登录成功");
                         window.location.href = "/index";
-                    }else {
-                        layer.msg(data.message)
+                    } else {
+                        var reg = new RegExp("[\\u4E00-\\u9FFF]+", "g");
+                        if (reg.test(data.message)) {
+                            layer.msg(data.message);
+                        } else {
+                            layer.msg('你已经在别处登录了,是否强制下线并登录', {
+                                time: false,
+                                btn: ['确定', '取消'],
+                                yes: function () {
+                                    $.post('/kickOff', {"sessionId":data.message,"message":"你已经在别处登录@warn"}, function (data) {
+                                        if (data.code === 'success') {
+                                            login();
+                                        }
+                                    });
+                                }
+                            });
+                        }
                     }
-                }
-            });
+                });
+            };
+            login();
             return false;
         });
     });

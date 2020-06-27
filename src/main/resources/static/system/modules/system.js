@@ -13,6 +13,7 @@ layui.extend({
     self.routeLeaveFunc = null;
     self.shrinkCls = 'sidebar-shrink';
     self.openFlag = false;
+    self.Click = false;
     self.resizeFlag = false;
     self.tabUrl = null;
     self.routeLeave = function (callback) {
@@ -79,7 +80,9 @@ layui.extend({
              view.container.removeClass('sidebar-menu');
         }
         var timer = function bodyresize(){
+            self.Click = true;
             $(window).resize();
+            self.Click = false;
         };
         setTimeout(timer,400);
         clearTimeout(timer);
@@ -88,6 +91,17 @@ layui.extend({
         self.route = layui.router();
         layer.closeAll();
         self.initView(self.route);
+    });
+    if ($(window).width() <= conf.mobileWidth) {
+        self.flexible(false);
+    }
+    $(window).on('resize', function (e) {
+        if(self.Click)return;
+        if ($(window).width() < conf.mobileWidth) {
+            self.flexible(false);
+        } else {
+            self.flexible(true);
+        }
     });
     $(document).on('click','[lay-href]',function (e) {
         var href = $(this).attr('lay-href');
@@ -132,6 +146,7 @@ layui.extend({
 
     //刷新事件
     self.on('refresh', function (init) {
+        if(self.tabUrl===null)return;
         if($('#'+conf.containerBody).hasClass('container-parent-hide')){
             $('#'+conf.containerBody).removeClass('container-parent-hide');
         }

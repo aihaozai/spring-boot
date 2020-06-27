@@ -1,7 +1,7 @@
 package com.example.myproject.controller;
 
 import com.example.myproject.common.activiti.DefaultProcessDiagramGenerator;
-import com.example.myproject.common.imageUtil.ImageEncodeUtil;
+import com.example.myproject.common.utils.imageUtil.ImageEncodeUtil;
 import com.example.myproject.common.pojo.Page;
 import com.example.myproject.entity.SystemResponse;
 import com.example.myproject.service.IProcessService;

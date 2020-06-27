@@ -1,6 +1,6 @@
 package com.example.myproject.common.HandlerInterceptor;
 
-import com.example.myproject.entity.view.UserLoginView;
+import com.example.myproject.entity.sys.view.UserLoginView;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.http.server.ServerHttpRequest;
 import org.springframework.http.server.ServerHttpResponse;
@@ -20,6 +20,7 @@ public class WebSocketHandshakeInterceptor implements HandshakeInterceptor {
         UserLoginView user = (UserLoginView) SecurityUtils.getSubject().getPrincipal();
         map.put("WEBSOCKET_USERNAME", user.getUsername());
         map.put("WEBSOCKET_USER_ID", user.getId()); //将用户标识放入参数列表后，下一步的websocket处理器可以读取这里面的数据
+        map.put("WEBSOCKET_LOGIN", user.getPassword());
         return true;
     }
 

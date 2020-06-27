@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="renderer" content="webkit">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=0">
+    <link rel="stylesheet" th:href="@{/layui/css/layui.css}" media="all">
+    <script th:src="@{/layui/layui.js}"></script>
+    <script th:src="@{/system/modules/timeUtil.js}"></script>
+</head>
+<body>
+<div>
+    <div style="padding: 10px; background-color: #F2F2F2;">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-col-md6">
+                <div class="layui-card">
+                    <div class="layui-card-body">
+                        <form class="layui-form" action="">
+                            <input type="hidden" id="quartzId" name="quartzId"  class="layui-input" th:value="${scheduleJob.quartzId}" maxlength="32">
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">执行类名称</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="beanName" name="beanName" lay-verify="required" lay-reqtext="执行类名称不能为空" placeholder="请输入" autocomplete="off" class="layui-input" th:value="${scheduleJob.beanName}" maxlength="80">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">任务名称</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="jobName" name="jobName" lay-verify="required" lay-reqtext="任务名称不能为空" placeholder="请输入" autocomplete="off" class="layui-input" th:value="${scheduleJob.jobName}" maxlength="30">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">任务分组</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="jobGroup" name="jobGroup"  lay-verify="required" lay-reqtext="任务分组不能为空" placeholder="请输入" class="layui-input" th:value="${scheduleJob.jobGroup}" maxlength="30">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">执行时间</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="cronExpression" name="cronExpression"  lay-verify="required" lay-reqtext="执行时间不能为空" placeholder="请输入" autocomplete="off" class="layui-input" th:value="${scheduleJob.cronExpression}" maxlength="30">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class=" layui-form-label" >开始时间</label>
+                                    <div class="layui-input-inline">
+                                        <input type="text" name="startTime" id="startTime"  placeholder="2019-10-16 00:00:00" autocomplete="off" class="layui-input layui-disabled" th:value="${scheduleJob.startTime}" disabled="">
+                                    </div>
+                                </div>
+                                <div class="layui-inline" style="width: 138px">
+                                    <label class="layui-form-label" style="width: 40px">状态</label>
+                                    <div class="layui-input-block" style="margin-left: 72px">
+                                        <input type="checkbox" id ="startStatus" name="startStatus" lay-filter="startStatus" lay-skin="switch" lay-text="开启|关闭">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <div class="layui-inline">
+                                    <label class="layui-form-label" >结束时间</label>
+                                    <div class="layui-input-inline" >
+                                        <input type="text" name="endTime" id="endTime"  placeholder="2019-10-16 00:00:00" autocomplete="off" class="layui-input layui-disabled" th:value="${scheduleJob.endTime}" disabled="">
+                                    </div>
+                                </div>
+                                <div class="layui-inline" style="width: 138px">
+                                    <label class="layui-form-label" style="width: 40px">状态</label>
+                                    <div class="layui-input-block" style="margin-left: 72px">
+                                        <input type="checkbox" id ="endStatus" name="endStatus" lay-filter="endStatus" lay-skin="switch"  lay-text="开启|关闭">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">参数</label>
+                                <div class="layui-input-block">
+                                    <input type="text" id="invokeParam" name="invokeParam" placeholder="请输入" autocomplete="off" class="layui-input" th:value="${scheduleJob.invokeParam}" maxlength="30">
+                                </div>
+                            </div>
+                            <div class="layui-form-item">
+                                <label class="layui-form-label">任务状态</label>
+                                <div class="layui-input-block">
+                                    <input type="checkbox" id ="jobStatus" name="jobStatus" lay-skin="switch" th:value="${scheduleJob.jobStatus}" lay-text="开启|关闭">
+                                </div>
+                            </div>
+                            <div class="layui-form-item" style="display: none">
+                                <div class="layui-input-block">
+                                    <!-- 隐藏提交按钮，在父层中调用 -->
+                                    <button class="layui-btn" lay-filter="addJobForm" lay-submit >添加</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script data-th-inline="none" th:inline="javascript">
+    layui.use(['form','layer','laydate'],function () {
+        var form = layui.form;
+        var layer = layui.layer;
+        var $ = layui.jquery;
+        var laydate = layui.laydate;
+        //日期
+        laydate.render({
+            trigger: 'click',   //添加trigger防止宽度比date控件小而闪退
+            elem: '#startTime',
+            min:0,  //之前日期不可选
+            type: 'datetime'
+        });
+        laydate.render({
+            trigger: 'click',   //添加trigger防止宽度比date控件小而闪退
+            elem: '#endTime',
+            min:0,  //之前日期不可选
+            type: 'datetime',
+            done: function(value, date){ //监听日期
+                var startTime = $('#startTime').val();
+                if(startTime.length>0){
+                    if(timeUtil.compareTime(startTime,value)){
+                        $('#endTime').val('');
+                        layer.msg("结束时间不能小于开始时间");
+                    }
+                }
+            }
+        });
+        checkOpen([$('#startTime'),$('#endTime')],[$('#startStatus'),$('#endStatus')]);
+        checkInput([$('#beanName'),$('#jobName'),$('#jobGroup')]);
+        if([[${scheduleJob.jobStatus}]]==="Y"){
+            $('#jobStatus').attr("checked", true);
+        }
+        form.render('checkbox');
+        form.on('submit(addJobForm)',function (data) {
+            if(data.field.jobStatus!=='Y'||data.field.jobStatus!=='N'){
+                data.field.jobStatus = data.field.jobStatus===undefined?'N':'Y';
+            }
+            var index = layer.load(1);
+            $.ajax({
+                type:'POST',
+                url:'/job/saveJob',
+                contentType:'application/json;charset=UTF-8',
+                data:JSON.stringify(data.field),
+                dataType:'json',
+                success:function (data) {
+                    if(data.code==="success"){
+                        //数据提交后关闭弹出层
+                        layer.close(index);     //关闭加载动画
+                        //获得index (window.name  或者 layer.open弹出层Id)
+                        index = parent.layer.getFrameIndex(window.name);
+                        parent.layer.close(index);
+                    }else {
+                        layer.close(index);     //关闭加载动画
+                        layer.msg(data.message);
+                    }
+                }
+            });
+            return false;
+        });
+        //监听开关
+        form.on('switch(startStatus)', function (data) {
+            //data.elem  得到checkbox原始DOM对象
+            //data.elem.checked 开关是否开启，true或者false
+            //data.value 开关value值，也可以通过data.elem.value得到
+            //data.othis 得到美化后的DOM对象
+            if(data.elem.checked)switchOpen($("#startTime"));
+            else switchClose($("#startTime"));
+        });
+        form.on('switch(endStatus)', function (data) {
+            if(data.elem.checked)switchOpen($("#endTime"));
+            else switchClose($("#endTime"));
+        });
+        form.on('switch(jobStatus)', function (data) {
+            if(data.elem.checked)$('#jobStatus').val('Y');
+            else $('#jobStatus').val('N');
+        });
+        function switchOpen(dom) {
+            dom.removeAttr("disabled").removeClass("layui-disabled");
+        }
+        function switchClose(dom) {
+            dom.attr("disabled","disabled").addClass("layui-disabled").val("").text("");
+        }
+        function checkOpen(dom,dom2) {
+            layui.each(dom,function (index,item) {
+                if(item.val().length>0){
+                    switchOpen(item);
+                    dom2[index].attr("checked", true);
+                }
+            })
+        }
+        function checkInput(dom) {
+            layui.each(dom,function (index,item) {
+                if(item.val().length>0){
+                    item.attr("disabled","disabled").addClass("layui-disabled")
+                }
+            })
+        }
+    })
+</script>
+</html>

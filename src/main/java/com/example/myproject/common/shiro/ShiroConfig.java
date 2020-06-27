@@ -69,7 +69,6 @@ public class ShiroConfig {
 
     /**
      * cookie管理对象
-     *
      * @return CookieRememberMeManager
      */
     private CookieRememberMeManager rememberMeManager() {
@@ -185,6 +184,7 @@ public class ShiroConfig {
     public RedisSessionDAO redisSessionDAO() {
         RedisSessionDAO redisSessionDAO = new RedisSessionDAO();
         redisSessionDAO.setRedisManager(redisManager());
+        //redisSessionDAO.setSessionIdGenerator(new SystemSessionIdGenerator());
         return redisSessionDAO;
     }
 

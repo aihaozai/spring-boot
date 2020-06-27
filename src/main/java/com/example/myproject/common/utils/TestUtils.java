@@ -1,11 +1,10 @@
 package com.example.myproject.common.utils;
 
-import com.example.myproject.service.IMenuService;
+import com.example.myproject.service.sys.IMenuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
-import java.util.List;
 
 /**
  * @Program: myproject

@@ -119,7 +119,7 @@ public class FTPSUtil {
         boolean success = true;
         String directory = remote;
         // 如果远程目录不存在，则递归创建远程服务器目录
-        if (!directory.equalsIgnoreCase("/") && !changeWorkingDirectory(new String(directory))) {
+        if (!directory.equalsIgnoreCase("/") && !changeWorkingDirectory(directory)) {
             int start = 0;
             int end = 0;
             if (directory.startsWith("/")) {
@@ -129,7 +129,7 @@ public class FTPSUtil {
             }
             end = directory.indexOf("/", start);
             String path = "";
-            String paths = "";
+            StringBuilder paths = new StringBuilder();
             while (true) {
                 String subDirectory = new String(remote.substring(start, end).getBytes("GBK"), "iso-8859-1");
                 path = path + "/" + subDirectory;
@@ -144,7 +144,7 @@ public class FTPSUtil {
                     changeWorkingDirectory(subDirectory);
                 }
 
-                paths = paths + "/" + subDirectory;
+                paths.append("/").append(subDirectory);
                 start = end + 1;
                 end = directory.indexOf("/", start);
                 // 检查所有目录是否创建完毕

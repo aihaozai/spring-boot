@@ -5,6 +5,7 @@ import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import com.example.myproject.common.HandlerInterceptor.SystemInterceptor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -68,14 +69,17 @@ public class SystemWebAppConfig implements WebMvcConfigurer {
         converters.add(fastConverter);
     }
 
-
+    @Bean
+    public SystemInterceptor systemInterceptor(){
+        return new SystemInterceptor();
+    }
     /**
      * 拦截器
      * @param registry
      */
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
-        registry.addInterceptor(new SystemInterceptor())
+        registry.addInterceptor(systemInterceptor())
                 .addPathPatterns("/**");
        log.info("自定义拦击器加载成功");
     }

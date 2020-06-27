@@ -327,17 +327,17 @@ html {
     right: 15px
 }
 
-@media screen and (max-width:992px) {
-    .layui-layout-admin .layui-side {
-        transform: translate3d(-220px,0,0);
-        -webkit-transform: translate3d(-220px,0,0);
-        width: 220px
-    }
+/*@media screen and (max-width:992px) {*/
+/*    .layui-layout-admin .layui-side {*/
+/*        transform: translate3d(-220px,0,0);*/
+/*        -webkit-transform: translate3d(-220px,0,0);*/
+/*        width: 220px*/
+/*    }*/
 
-    .layadmin-pagetabs,.layui-layout-admin .layui-body,.layui-layout-admin .layui-footer,.layui-layout-admin .layui-layout-left {
-        left: 0
-    }
-}
+/*    .layadmin-pagetabs,.layui-layout-admin .layui-body,.layui-layout-admin .layui-footer,.layui-layout-admin .layui-layout-left {*/
+/*        left: 0*/
+/*    }*/
+/*}*/
 
 .layadmin-side-shrink .layui-layout-admin .layui-logo {
     width: 60px;

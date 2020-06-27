@@ -1,5 +1,6 @@
 package com.example.myproject.common.baseController;
 
+import com.example.myproject.common.HandlerInterceptor.WebSocketHandler;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.authc.AuthenticationToken;
 import org.apache.shiro.subject.Subject;
@@ -9,7 +10,7 @@ import org.apache.shiro.subject.Subject;
  * @Author: haozai
  * @Create: 2019-09-16 14:44
  **/
-public class BaseController {
+public class BaseController extends WebSocketHandler {
     private Subject getSubject() {
         return SecurityUtils.getSubject();
     }

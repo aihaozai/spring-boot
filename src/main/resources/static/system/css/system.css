@@ -153,8 +153,3 @@
     border-radius: 2px;
     white-space: nowrap;
 }
-@media screen and (max-width:992px) {
-    .layui-tab-left {
-        left: 0
-    }
-}

@@ -1,10 +1,6 @@
 package com.example.myproject.controller;
 
-import com.example.myproject.common.imageUtil.ImageUtil;
-import com.example.myproject.common.imageUtil.MeiZiUtil;
-
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
+import com.example.myproject.common.utils.imageUtil.MeiZiUtil;
 
 /**
  * @Program: myproject

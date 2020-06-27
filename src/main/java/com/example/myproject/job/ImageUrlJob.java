@@ -1,6 +1,6 @@
 package com.example.myproject.job;
 
-import com.example.myproject.common.imageUtil.MeiZiTuUtil;
+import com.example.myproject.common.utils.imageUtil.MeiZiTuUtil;
 import org.quartz.*;
 import org.springframework.stereotype.Component;
 

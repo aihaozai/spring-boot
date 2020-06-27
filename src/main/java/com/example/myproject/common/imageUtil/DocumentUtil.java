@@ -1,4 +1,4 @@
-package com.example.myproject.common.imageUtil;
+package com.example.myproject.common.utils.imageUtil;
 
 import org.jsoup.Connection;
 import org.jsoup.Jsoup;

@@ -53,16 +53,22 @@
         }
     </style>
 </head>
+<body>
 <div id="main" class="layadmin-tabspage-none"></div>
+</body>
 
 <script th:src="@{layui/layui.js}"></script>
 <script th:inline="javascript">
-    console.log([[${roles}]]);
+    //防止页面后退
+    history.pushState(null, null, document.URL);
+    window.addEventListener('popstate', function () {
+        history.pushState(null, null, document.URL);
+    });
     var currentUser ={};
      currentUser.roles = [[${roles}]];
         layui.config({
             base: './system/',
             debug: true
-        }).use(['index','websocket']);
+        }).use(['index']);
 </script>
 </html>

@@ -23,6 +23,6 @@ public class MenuTree implements Serializable{
     private String menuType;
     private String menuUrl;
     private String menuIcon;
-    private String sort;
+    private Integer sort;
     private List<MenuTree> childrens = new ArrayList<>();
 }

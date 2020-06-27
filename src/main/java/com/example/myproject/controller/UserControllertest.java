@@ -1,45 +1,31 @@
 package com.example.myproject.controller;
 
 
-import com.example.myproject.common.activiti.DefaultProcessDiagramCanvas;
-import com.example.myproject.common.activiti.DefaultProcessDiagramGenerator;
+import com.example.myproject.common.annotation.RepeatedRequests;
 import com.example.myproject.common.baseDao.AllDao;
-import com.example.myproject.common.pojo.Page;
+import com.example.myproject.common.utils.SpringContextUtil;
 import com.example.myproject.common.utils.UUIDUtil;
-import com.example.myproject.entity.ApplyLeave;
-import com.example.myproject.entity.SystemResponse;
-import com.example.myproject.entity.User;
+import com.example.myproject.common.pojo.SystemResponse;
+import com.example.myproject.entity.business.ApplyLeave;
+import com.example.myproject.entity.sys.User;
 import com.example.myproject.entity.activiti.ActHiTaskProcess;
-import com.example.myproject.entity.view.UserLoginView;
+import com.example.myproject.entity.sys.view.UserLoginView;
 import com.example.myproject.mapper.ActHiTaskProcessMapper;
-import com.github.pagehelper.PageHelper;
+import com.example.myproject.mapper.ApplyLeaveMapper;
 import com.github.pagehelper.PageInfo;
 import lombok.extern.slf4j.Slf4j;
-import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.*;
-import org.activiti.engine.history.HistoricActivityInstance;
-import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
-import org.activiti.engine.impl.RepositoryServiceImpl;
-import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
 import org.activiti.engine.impl.identity.Authentication;
-import org.activiti.engine.impl.javax.el.ExpressionFactory;
-import org.activiti.engine.impl.javax.el.ValueExpression;
-import org.activiti.engine.impl.juel.ExpressionFactoryImpl;
-import org.activiti.engine.impl.juel.SimpleContext;
-import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmActivity;
 import org.activiti.engine.impl.pvm.PvmTransition;
 import org.activiti.engine.impl.pvm.process.ActivityImpl;
 import org.activiti.engine.impl.pvm.process.ProcessDefinitionImpl;
 import org.activiti.engine.impl.pvm.process.TransitionImpl;
-import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.repository.Model;
-import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.runtime.ProcessInstance;
 import org.activiti.engine.task.Task;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.apache.shiro.session.Session;
 import org.apache.shiro.session.mgt.eis.SessionDAO;
@@ -51,14 +37,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
-import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.http.HttpServletResponse;
-import java.io.InputStream;
+
 import java.sql.Timestamp;
 import java.util.*;
 
@@ -128,6 +113,7 @@ public class UserControllertest {
     @Autowired
     private AllDao.ApplyLeaveDao applyLeaveDao;
 
+    @RepeatedRequests
     @ResponseBody
     @GetMapping("/apply")
     public SystemResponse applyLeave(){
@@ -135,21 +121,31 @@ public class UserControllertest {
         actHiTaskProcess.setStartTime(new Timestamp(new Date().getTime()));
         return new SystemResponse().success().data(actHiTaskProcess);
     }
+    @RepeatedRequests(5000)
     @GetMapping("/up")
     public String upload(){
         return "/layout";
     }
+    @Autowired
+    private ApplyLeaveMapper applyLeaveMapper;
+
     @GetMapping("/hi")
     @ResponseBody
-    public void hi(Model model){
-//        Map<String,Object> map = model.asMap();
-//        Set<String> keyset = map.keySet();
-//        Iterator<String> iterator = keyset.iterator();
-//        while (iterator.hasNext()){
-//            String key = iterator.next();
-//            Object value = map.get(key);
-//            System.out.println(key+">>>>>"+value);
-//        }
+    @Transactional
+    public void hi(){
+        //SpringContextUtil.getBean(this.getClass()).hitest();
+        hitest();
+    }
+
+    @Transactional
+    public void hitest(){
+        ApplyLeave  applyLeave = new ApplyLeave();
+        applyLeave.setId("1");
+        applyLeave.setLeaveType("3434");
+        applyLeaveMapper.updateApplyLeave(applyLeave);
+        int nym = 1/0;
+        applyLeave.setApplyReason("1212");
+        applyLeaveMapper.updateApplyLeave(applyLeave);
     }
 
     @GetMapping("/t1")

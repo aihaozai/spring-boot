@@ -2,22 +2,21 @@ package com.example.myproject.controller;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.common.pojo.Page;
-import com.example.myproject.entity.ApplyLeave;
-import com.example.myproject.entity.Menu;
-import com.example.myproject.entity.SystemResponse;
-import com.example.myproject.entity.view.UserLoginView;
-import com.example.myproject.service.IApplyLeaveService;
-import com.example.myproject.service.IDictService;
+import com.example.myproject.entity.business.ApplyLeave;
+import com.example.myproject.common.pojo.SystemResponse;
+import com.example.myproject.entity.sys.view.UserLoginView;
+import com.example.myproject.service.business.IApplyLeaveService;
+import com.example.myproject.service.sys.IDictService;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseBody;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.ModelAndView;
-
 import java.util.Map;
 
 /**
@@ -25,6 +24,7 @@ import java.util.Map;
  * @Author: haozai
  * @Create: 2020-01-02 22:27
  **/
+@Api(tags = "请假接口")
 @Controller
 @RequestMapping("applyLeave")
 public class ApplyLeaveController {
@@ -34,12 +34,14 @@ public class ApplyLeaveController {
     @Autowired
     private IDictService dictServiceImpl;
 
-    @RequestMapping("/applyLeaveList")
+    @ApiOperation("请假页面接口")
+    @GetMapping(value = "/applyLeaveList")
     public String applyLeaveList(){
         return "applyLeave/applyLeaveList";
     }
 
-    @PostMapping("/addLeave")
+    @ApiOperation("添加请假接口")
+    @PostMapping(value = "/addLeave")
     public ModelAndView addLeave(@RequestBody JSONObject jsonObject){
         ModelAndView modelAndView = new ModelAndView("applyLeave/addLeave");
         UserLoginView user = (UserLoginView) SecurityUtils.getSubject().getPrincipal();
@@ -55,9 +57,9 @@ public class ApplyLeaveController {
         modelAndView.addObject("approveDict",dictServiceImpl.findDictByPName("审批状态"));
         return modelAndView;
     }
-
+    @ApiOperation("请假列表分页接口")
     @ResponseBody
-    @RequestMapping("/getApplyLeavePage")
+    @GetMapping(value = "/getApplyLeavePage")
     public SystemResponse getApplyLeavePage(Page page){
         try {
             UserLoginView user = (UserLoginView) SecurityUtils.getSubject().getPrincipal();
@@ -69,7 +71,7 @@ public class ApplyLeaveController {
             return new SystemResponse().pageDataFail();
         }
     }
-
+    @ApiOperation("保存或编辑请假接口")
     @ResponseBody
     @PostMapping("/addOrUpdateApplyLeave")
     public SystemResponse addOrUpdateApplyLeave(ApplyLeave applyLeave){
@@ -81,6 +83,11 @@ public class ApplyLeaveController {
         }
     }
 
+    @ApiOperation("检查请是否已审批接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "tableId", value = "表id",required = true),
+            @ApiImplicitParam(name = "type", value = "审批状态",required = true)
+    })
     @ResponseBody
     @PostMapping("/checkProcess")
     public SystemResponse checkProcess(String id,String type){
@@ -91,6 +98,12 @@ public class ApplyLeaveController {
             return new SystemResponse().fail().message(e.getMessage());
         }
     }
+
+    @ApiOperation("完成请假审批接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "tableId", value = "表id",required = true),
+            @ApiImplicitParam(name = "type", value = "审批状态",required = true)
+    })
     @ResponseBody
     @PostMapping("/completeProcess")
     public SystemResponse completeProcess(String tableId,String type){

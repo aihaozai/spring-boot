@@ -1,7 +1,7 @@
 package com.example.myproject.common.utils;
 
 import com.example.myproject.common.pojo.MenuTree;
-import com.example.myproject.entity.view.PersonMenuView;
+import com.example.myproject.entity.sys.view.PersonMenuView;
 
 import java.util.ArrayList;
 import java.util.List;

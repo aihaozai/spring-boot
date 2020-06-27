@@ -1,0 +1,76 @@
+<div class="layadmin-tabsbody-item layui-show" style="overflow: hidden">
+    <div class="layui-fluid">
+        <div class="layui-row layui-col-space15">
+            <div class="layui-card layui-card-body">
+                <div class="layui-layout">
+                        <div class="div-head">
+                            <div class="layui-form" style="width: 100%">
+                                <div class="layui-form-item">
+                                    <div class="layui-input-block">
+                                        <input type="text" id="targetUrl"  placeholder="请输入" class="layui-input" maxlength="45" >
+                                    </div>
+                                </div>
+                                <select id="imageType" lay-filter="imageType">
+                                    <option value=0>京东详情</option>
+                                </select>
+                                <button id="btn" type="button"  href="javascript:void(0)" class="layui-btn layui-btn-sm layui-btn-radius layui-btn-primary">添加</button>
+                            </div>
+                        </div>
+                        <div class="layui-table-box" style="height:89%;margin-top: 2%;">
+                            <ul class="flow-default scroll-list" id="targetImage" ></ul>
+                        </div>
+                    </div>
+            </div>
+        </div>
+    </div>
+</div>
+<script data-th-inline="none" type="text/javascript">
+    layui.use(['flow','layer','form'], function(){
+        var $ = layui.jquery;
+        var flow = layui.flow;
+        var layer = layui.layer;
+        var form = layui.form;
+        form.render('select');
+        var type = 0;
+        $('#btn').click(function () {
+            $.post('image/getImageUrl',{"url":$("#targetUrl").val(),"type":type},function (res) {
+                if(res.code==='success'){
+                    layer.msg(res.message);
+                    imageLoad(res.data);
+                }
+            });
+        });
+        form.on('select(imageType)', function(data){
+            type = data.value;
+        });
+        function imageLoad(data){
+            flow.load({
+                elem: '#targetImage' //流加载容器
+                ,scrollElem: '#targetImage' //滚动条所在元素，一般不用填，此处只是演示需要。
+                ,isAuto: true
+                ,isLazyimg: true
+                ,done: function(page, next){ //执行下一页的回调
+                    //模拟数据插入
+                    setTimeout(function(){
+                        var lis = [];
+                        var num = Math.floor(data.length/10);
+                        var yu = data.length%10;
+                        for(var i = 0; i < 10; i++){
+                            lis.push('<li><img lay-src="'+data[(page-1)*10 + i + 1 ]+'"></li>')
+                        }
+                        //执行下一页渲染，第二参数为：满足“加载更多”的条件，即后面仍有分页
+                        //pages为Ajax返回的总页数，只有当前页小于总页数的情况下，才会继续出现加载更多
+                        next(lis.join(''), page < num); //假设总页数为 10
+                    }, 500);
+                }
+            });
+            $("body").on("click", "#targetImage", function (e) {
+                layer.photos({
+                    photos: {"data": [{"src": e.target.src}]},
+                    area: ['auto','auto'],
+                    closeBtn: 1
+                });
+            });
+        }
+    });
+</script>

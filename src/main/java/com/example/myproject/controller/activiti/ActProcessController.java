@@ -2,9 +2,9 @@ package com.example.myproject.controller.activiti;
 
 import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.common.baseDao.AllDao;
-import com.example.myproject.entity.SystemResponse;
+import com.example.myproject.common.pojo.SystemResponse;
 import com.example.myproject.entity.activiti.ActHiTaskProcess;
-import com.example.myproject.entity.view.UserLoginView;
+import com.example.myproject.entity.sys.view.UserLoginView;
 import lombok.extern.slf4j.Slf4j;
 import org.activiti.engine.ProcessEngine;
 import org.activiti.engine.ProcessEngines;

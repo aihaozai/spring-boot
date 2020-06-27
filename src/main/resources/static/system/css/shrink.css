@@ -32,3 +32,17 @@
     -webkit-transition: all .3s;
     width: 100%;
 }
+
+@media screen and (max-width:992px) {
+    .sidebar-shrink #app-sidebar {
+        left: -52px;
+        width: 52px;
+    }
+    .sidebar-shrink .layui-body,.sidebar-shrink #app-header .layui-layout-left,.sidebar-shrink #lay-tab{
+        left: 0
+    }
+    .sidebar-shrink #app-sidebar .layui-logo {
+        left: -52px;
+        width: 52px
+    }
+}

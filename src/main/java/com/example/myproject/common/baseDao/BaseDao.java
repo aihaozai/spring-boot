@@ -303,14 +303,14 @@ public class BaseDao<T,ID extends Serializable> {
         String sql = MessageFormat.format("select max({0}) FROM {1} ", tFiled,entityClass.getSimpleName());
         String num = createHSQLMax(sql).toString();
         entityManager.close();
-        return new Integer(num);
+        return Integer.valueOf(num);
     }
 
     public Integer findMaxByFiled(String tFiled,String filed,String value){
         String sql = MessageFormat.format("select max({0}) FROM {1} where {2} = ''{3}'' ", tFiled,entityClass.getSimpleName(),filed,value);
         String num = createHSQLMax(sql).toString();
         entityManager.close();
-        return new Integer(num);
+        return Integer.valueOf(num);
     }
 
     /**

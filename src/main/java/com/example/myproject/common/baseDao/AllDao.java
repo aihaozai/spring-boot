@@ -1,9 +1,16 @@
 package com.example.myproject.common.baseDao;
 
 import com.example.myproject.common.Scheduled.ScheduleJob;
-import com.example.myproject.entity.*;
 import com.example.myproject.entity.activiti.ActHiTaskProcess;
-import com.example.myproject.entity.view.*;
+import com.example.myproject.entity.activiti.ActReModel;
+import com.example.myproject.entity.activiti.view.ApplyLeaveView;
+import com.example.myproject.entity.business.ApplyLeave;
+import com.example.myproject.entity.business.DeploymentProcdefView;
+import com.example.myproject.entity.sys.*;
+import com.example.myproject.entity.sys.view.MenuPermissionRoleView;
+import com.example.myproject.entity.sys.view.PersonMenuView;
+import com.example.myproject.entity.sys.view.UserLoginView;
+import com.example.myproject.entity.sys.view.UserOrganRoleView;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -17,95 +24,95 @@ import java.util.List;
 @Repository
 public class AllDao{
     @Repository
-    public class UserDao extends BaseDao<User,String>{
+    public static class UserDao extends BaseDao<User,String>{
 
     }
 
     @Repository
-    public class UserRoleDao extends BaseDao<UserRole,String>{
+    public static class UserRoleDao extends BaseDao<UserRole,String>{
 
     }
 
     @Repository
-    public class UserLoginViewDao extends BaseDao<UserLoginView,String>{
+    public static class UserLoginViewDao extends BaseDao<UserLoginView,String>{
 
     }
 
     @Repository
-    public class PersonMenuViewDao extends BaseDao<PersonMenuView,String>{
+    public static class PersonMenuViewDao extends BaseDao<PersonMenuView,String>{
 
     }
 
     @Repository
-    public class MenuPermissionDao extends BaseDao<MenuPermission,String>{
+    public static class MenuPermissionDao extends BaseDao<MenuPermission,String>{
 
     }
     @Repository
-    public class MenuDao extends BaseDao<Menu,String>{
+    public static class MenuDao extends BaseDao<Menu,String>{
 
     }
     @Repository
-    public class ScheduleJobDao extends BaseDao<ScheduleJob,String>{
+    public static class ScheduleJobDao extends BaseDao<ScheduleJob,String>{
 
     }
     @Repository
-    public class RoleDao extends BaseDao<Person,String>{
+    public static class RoleDao extends BaseDao<Person,String>{
 
     }
     @Repository
-    public class MenuRoleDao extends BaseDao<MenuRole,String>{
+    public static class MenuRoleDao extends BaseDao<MenuRole,String>{
 
     }
     @Repository
-    public class ActReModelDao extends BaseDao<ActReModel,String>{
+    public static class ActReModelDao extends BaseDao<ActReModel,String>{
 
     }
     @Repository
-    public class DeplotmentProcdefViewDao extends BaseDao<DeplotmentProcdefView,String>{
-
-    }
-
-    @Repository
-    public class OrganDao extends BaseDao<Organ,String>{
+    public static class DeploymentProcdefViewDao extends BaseDao<DeploymentProcdefView,String>{
 
     }
 
     @Repository
-    public class OrganRoleDao extends BaseDao<OrganRole,String>{
+    public static class OrganDao extends BaseDao<Organ,String>{
 
     }
 
     @Repository
-    public class PermissionRoleDao extends BaseDao<PermissionRole,String>{
+    public static class OrganRoleDao extends BaseDao<OrganRole,String>{
+
+    }
+
+    @Repository
+    public static class PermissionRoleDao extends BaseDao<PermissionRole,String>{
         public List<String> findListByJSONObject(String menuId, String roleId){
             String sql = "SELECT role_permission FROM permission_role where role_id = '"+roleId+"' and menu_id = '"+menuId+"'";
             return this.findListBySQL(sql);
         }
     }
     @Repository
-    public class MenuPermissionRoleViewDao extends BaseDao<MenuPermissionRoleView,String>{
+    public static class MenuPermissionRoleViewDao extends BaseDao<MenuPermissionRoleView,String>{
 
     }
 
     @Repository
-    public class DictDao extends BaseDao<Dict,String>{
+    public static class DictDao extends BaseDao<Dict,String>{
 
     }
     @Repository
-    public class ApplyLeaveDao extends BaseDao<ApplyLeave,String>{
+    public static class ApplyLeaveDao extends BaseDao<ApplyLeave,String>{
 
     }
 
     @Repository
-    public class ApplyLeaveViewDao extends BaseDao<ApplyLeaveView,String>{
+    public static class ApplyLeaveViewDao extends BaseDao<ApplyLeaveView,String>{
 
     }
     @Repository
-    public class UserOrganRoleViewDao extends BaseDao<UserOrganRoleView,String>{
+    public static class UserOrganRoleViewDao extends BaseDao<UserOrganRoleView,String>{
 
     }
     @Repository
-    public class ActHiTaskProcessDao extends BaseDao<ActHiTaskProcess,String>{
+    public static class ActHiTaskProcessDao extends BaseDao<ActHiTaskProcess,String>{
 
     }
 

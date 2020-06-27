@@ -28,7 +28,9 @@ public class FileMonitorUtil {
     }
 
     public static void stop() throws Exception {
-        FileMonitorUtil.monitor.stop();
-        FileMonitorUtil.running = false;
+        if(FileMonitorUtil.monitor!=null) {
+            FileMonitorUtil.monitor.stop();
+            FileMonitorUtil.running = false;
+        }
     }
 }

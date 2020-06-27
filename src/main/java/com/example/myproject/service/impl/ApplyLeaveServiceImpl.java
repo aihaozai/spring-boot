@@ -1,4 +1,4 @@
-package com.example.myproject.service.impl;
+package com.example.myproject.service.business.impl;
 
 import com.example.myproject.common.baseDao.AllDao;
 import com.example.myproject.common.pojo.Page;

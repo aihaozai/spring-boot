@@ -1,5 +1,7 @@
 package com.example.myproject.mapper;
-import com.example.myproject.entity.ApplyLeave;
+
+
+import com.example.myproject.entity.business.ApplyLeave;
 import org.springframework.stereotype.Repository;
 
 @Repository

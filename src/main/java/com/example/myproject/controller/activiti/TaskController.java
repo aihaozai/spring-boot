@@ -3,14 +3,15 @@ package com.example.myproject.controller.activiti;
 import com.alibaba.fastjson.JSONObject;
 import com.example.myproject.common.HandlerInterceptor.WebSocketHandler;
 import com.example.myproject.common.activiti.DefaultProcessDiagramGenerator;
-import com.example.myproject.common.imageUtil.ImageEncodeUtil;
-import com.example.myproject.entity.ApplyLeave;
-import com.example.myproject.entity.SystemResponse;
+import com.example.myproject.common.utils.imageUtil.ImageEncodeUtil;
+import com.example.myproject.common.pojo.SystemResponse;
 import com.example.myproject.entity.activiti.ActHiTaskProcess;
-import com.example.myproject.entity.view.UserLoginView;
-import com.example.myproject.service.IActHiTaskProcessService;
-import com.example.myproject.service.IProcessService;
+import com.example.myproject.service.sys.IActHiTaskProcessService;
 import com.github.pagehelper.PageHelper;
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiImplicitParam;
+import io.swagger.annotations.ApiImplicitParams;
+import io.swagger.annotations.ApiOperation;
 import org.activiti.bpmn.model.BpmnModel;
 import org.activiti.engine.*;
 import org.activiti.engine.history.HistoricActivityInstance;
@@ -18,15 +19,11 @@ import org.activiti.engine.history.HistoricProcessInstance;
 import org.activiti.engine.history.HistoricTaskInstance;
 import org.activiti.engine.impl.RepositoryServiceImpl;
 import org.activiti.engine.impl.bpmn.behavior.UserTaskActivityBehavior;
-import org.activiti.engine.impl.identity.Authentication;
-import org.activiti.engine.impl.interceptor.Command;
 import org.activiti.engine.impl.javax.el.ExpressionFactory;
 import org.activiti.engine.impl.javax.el.ValueExpression;
 import org.activiti.engine.impl.juel.ExpressionFactoryImpl;
 import org.activiti.engine.impl.juel.SimpleContext;
 import org.activiti.engine.impl.persistence.entity.ExecutionEntity;
-import org.activiti.engine.impl.persistence.entity.HistoricActivityInstanceEntity;
-import org.activiti.engine.impl.persistence.entity.HistoricActivityInstanceEntityManager;
 import org.activiti.engine.impl.persistence.entity.ProcessDefinitionEntity;
 import org.activiti.engine.impl.pvm.PvmActivity;
 import org.activiti.engine.impl.pvm.PvmTransition;
@@ -37,7 +34,6 @@ import org.activiti.engine.impl.task.TaskDefinition;
 import org.activiti.engine.runtime.Execution;
 import org.activiti.engine.task.Task;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.shiro.SecurityUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.socket.TextMessage;
@@ -51,6 +47,7 @@ import java.util.*;
  * @Author: haozai
  * @Create: 2020-01-15 13:43
  **/
+@Api(tags = "任务接口")
 @RequestMapping("/task")
 @RestController
 public class TaskController extends WebSocketHandler{
@@ -68,10 +65,12 @@ public class TaskController extends WebSocketHandler{
     @Autowired
     private IActHiTaskProcessService hiTaskProcessServiceImpl;
 
-    private final Integer AGREE = 0;
-    private final Integer REJECT = 1;
+    private static final Integer AGREE = 0;
+    private static final Integer REJECT = 1;
 
-    @RequestMapping("/showTaskImage")
+    @ApiOperation("显示审批流程图接口")
+    @ApiImplicitParam(name = "processInstanceId", value = "流程实例id",required = true)
+    @PostMapping("/showTaskImage")
     public SystemResponse showTaskImage(String processInstanceId)throws Exception {
         HistoricProcessInstance processInstance = historyService.createHistoricProcessInstanceQuery().processInstanceId(processInstanceId).singleResult();
         String procDefId = processInstance.getProcessDefinitionId();
@@ -137,9 +136,9 @@ public class TaskController extends WebSocketHandler{
                         highLightedFinishes,//所有活动过的节点，包括当前在激活状态下的节点
                         activeActivityIds,//当前为激活状态下的节点
                         highLightedFlows,//活动过的线
-                        "宋体",
-                        "宋体",
-                        "宋体",
+                        "simsun",
+                        "simsun",
+                        "simsun",
                         processEngineConfiguration.getClassLoader(),
                         1.0);
 
@@ -153,7 +152,9 @@ public class TaskController extends WebSocketHandler{
         return new SystemResponse().success().data(result);
     }
 
-    @RequestMapping("/showTaskBack")
+    @ApiOperation("显示任务回退接口")
+    @ApiImplicitParam(name = "processInstanceId", value = "流程实例id",required = true)
+    @PostMapping("/showTaskBack")
     public SystemResponse showTaskBack(String processInstanceId){
         //获取已完成的任务历史记录
         List<HistoricTaskInstance> htiList = historyService.createHistoricTaskInstanceQuery()
@@ -169,6 +170,7 @@ public class TaskController extends WebSocketHandler{
         }
     }
 
+    @ApiOperation("显示流程时间线接口")
     @ResponseBody
     @PostMapping("/showFlowLine")
     public SystemResponse showFlowLine(@RequestBody JSONObject jsonObject){
@@ -181,6 +183,7 @@ public class TaskController extends WebSocketHandler{
         }
     }
 
+    @ApiOperation("同意任务接口")
     @ResponseBody
     @PostMapping("/agreeTask")
     public SystemResponse agreeTask(@RequestBody JSONObject jsonObject){
@@ -203,6 +206,7 @@ public class TaskController extends WebSocketHandler{
         }
     }
 
+    @ApiOperation("完成任务接口")
     @ResponseBody
     @PostMapping("/completeTask")
     public SystemResponse completeTask(@RequestBody JSONObject jsonObject){
@@ -219,6 +223,11 @@ public class TaskController extends WebSocketHandler{
         }
     }
 
+    @ApiOperation("回退任务接口")
+    @ApiImplicitParams({
+            @ApiImplicitParam(name = "taskId", value = "任务id",required = true),
+            @ApiImplicitParam(name = "comment", value = "意见",required = true)
+    })
     @ResponseBody
     @PostMapping("/rejectTask")
     public SystemResponse rejectTask(String taskId,String comment){
@@ -290,6 +299,8 @@ public class TaskController extends WebSocketHandler{
         }
     }
 
+    @ApiOperation("检查是否完成接口")
+    @ApiImplicitParam(name = "taskId", value = "任务id",required = true)
     @ResponseBody
     @PostMapping("/checkTask")
     public SystemResponse checkTask(String taskId){
@@ -355,6 +366,8 @@ public class TaskController extends WebSocketHandler{
         return hiTaskProcess;
     }
 
+    @ApiOperation("得到下一个任务接口")
+    @ApiImplicitParam(name = "taskId", value = "任务id",required = true)
     @ResponseBody
     @PostMapping("/getNextTask")
     public SystemResponse getNextTask(String taskId){
@@ -399,8 +412,8 @@ public class TaskController extends WebSocketHandler{
             id = activityImpl.getId();
             if (activitiId.equals(id)) {
                 //获取下一个节点信息
-                TaskDefinition taskDefinition = ((UserTaskActivityBehavior) activityImpl.getActivityBehavior())
-                        .getTaskDefinition();
+//                TaskDefinition taskDefinition = ((UserTaskActivityBehavior) activityImpl.getActivityBehavior())
+//                        .getTaskDefinition();
 
                 //return taskDefinition;
                 task = nextTaskDefinition(activityImpl, activityImpl.getId(), null, processInstanceId);

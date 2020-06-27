@@ -1,4 +1,4 @@
-package com.example.myproject.common.imageUtil;
+package com.example.myproject.common.utils.imageUtil;
 
 
 import org.jsoup.nodes.Document;
@@ -7,7 +7,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import static com.example.myproject.common.imageUtil.DocumentUtil.getDocument;
+import static com.example.myproject.common.utils.imageUtil.DocumentUtil.getDocument;
 
 /**
  * @Program: myproject

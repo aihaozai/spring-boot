@@ -1,6 +1,6 @@
 package com.example.myproject.common.utils;
 
-import com.example.myproject.entity.Organ;
+import com.example.myproject.entity.sys.Organ;
 import com.example.myproject.common.pojo.SelectTree;
 import com.example.myproject.common.pojo.SelectTreeNoChildren;
 

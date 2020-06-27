@@ -4,6 +4,7 @@ import org.activiti.bpmn.model.AssociationDirection;
 import org.activiti.bpmn.model.GraphicInfo;
 import org.activiti.image.exception.ActivitiImageException;
 import org.activiti.image.util.ReflectUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import javax.imageio.ImageIO;
@@ -119,11 +120,11 @@ public class DefaultProcessDiagramCanvas {
 
         this.g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         this.g.setPaint(Color.black);
-        Font font = new Font(this.activityFontName, 1, 11);
+        Font font = this.loadFontFromResources(this.activityFontName, 1, 11);
         this.g.setFont(font);
-        this.fontMetrics = this.g.getFontMetrics();
-        LABEL_FONT = new Font(this.labelFontName, 2, 10);
-        ANNOTATION_FONT = new Font(this.annotationFontName, 0, 11);
+        this.fontMetrics = this.g.getFontMetrics();   //docker 安装ttf-dejavu
+        LABEL_FONT = this.loadFontFromResources(this.labelFontName, 2, 10);
+        ANNOTATION_FONT = this.loadFontFromResources(this.annotationFontName, 0, 11);
 
         try {
             USERTASK_IMAGE = ImageIO.read(ReflectUtil.getResource("org/activiti/icons/userTask.png", this.customClassLoader));
@@ -1080,6 +1081,46 @@ public class DefaultProcessDiagramCanvas {
         private SHAPE_TYPE() {
         }
     }
+
+    /**
+     * 根据名称从resources中加载字体
+     *
+     * @param fontName
+     * @param fontStyle
+     * @param fontSize
+     * @return
+     */
+    public Font loadFontFromResources(String fontName, int fontStyle, float fontSize) {
+        Font font = null;
+        if (StringUtils.isEmpty(fontName)) {
+            return font;
+        }
+        try {
+            //加载resources下的字体文件,文件命名与设置的字体名称一一对应
+            InputStream fontInputStream = this.getClass().getResourceAsStream("/static/system/fonts/" + fontName + ".ttc");
+            //未找到项目中相应的字体文件，则使用系统的字体
+            if (fontInputStream == null) {
+                return new Font(fontName, fontStyle, (int) fontSize);
+            }
+            font = Font.createFont(Font.TRUETYPE_FONT, fontInputStream);
+            //设置字体类型
+            if (fontStyle > -1) {
+                font = font.deriveFont(fontStyle);
+            }
+            //设置字体大小
+            if (fontSize > -1) {
+                font = font.deriveFont(fontSize);
+            }
+        } catch (FontFormatException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return font;
+    }
+
 }
 
 
