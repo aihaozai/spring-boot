@@ -6,8 +6,8 @@ layui.define(function(exports) {
     entry: '/index',
     eventName: 'layadmin-event',
     mobileWidth: 992,
-    webSocket: 'ws://localhost:80/websocket/socketServer',
-    mozWebSocket: 'ws://localhost:80/websocket/socketServer',
-    sockJS: 'http://localhost:80/sockjs/socketServer'
+    webSocket: 'ws://47.115.80.180:80/websocket/socketServer',
+    mozWebSocket: 'ws://47.115.80.180:80/websocket/socketServer',
+    sockJS: 'http://47.115.80.180:80/sockjs/socketServer'
   })
 });
